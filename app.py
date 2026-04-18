@@ -454,8 +454,8 @@ def show_vault_strategy_section(all_protocols: dict, params: dict) -> None:
     st.markdown("---")
     st.header("Vault Strategy Risk Score")
     st.markdown(
-        "If you want to check the risk of a given vault or investment strategy, "
-        "select the protocols involved and set a maximum allocation for each."
+        "Use this secondary tool to assess the risk of a diversified investment strategy or a specific vault. "
+        "To begin, select the protocols involved from the list and assign an approximate maximum percentage allocation to each."
     )
 
     non_assets = [s for s, p in all_protocols.items() if not is_asset(p)]
@@ -616,8 +616,9 @@ def main() -> None:
 
     st.header("Protocol Risk")
     st.markdown(
-        "This tool rates protocol risk and monitors protocol health "
-        "to help you allocate funds into the more reliable protocols."
+        "This tool evaluates protocol risk and continuously monitors protocol health, "
+        "helping you assess risk when allocating capital to a particular protocol. "
+        "Use it to understand its condition and avoid hidden vulnerabilities before committing funds."
     )
     with st.container(border=True):
         show_protocol_grid(all_protocols)
