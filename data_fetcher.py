@@ -55,17 +55,38 @@ def fetch_stablecoin_price_history(coin_id: str) -> pd.DataFrame:
 
 def fetch_top_usde_pools(n: int = 4) -> pd.DataFrame:
     """Top N DeFiLlama yield pools containing USDe, sorted by TVL."""
-    r = requests.get(f"{_LLAMA_YIELDS}/pools", timeout=30)
+    r = requests.get(f"{_LLAMA_YIELDS}/pools", timeout=60)
     r.raise_for_status()
-    pools = r.json().get("data", [])
+    raw = r.json()
+    # Handle both {"data": [...]} and direct list
+    pools = raw.get("data", raw) if isinstance(raw, dict) else raw
+    if not isinstance(pools, list):
+        return pd.DataFrame()
     filtered = [
         p for p in pools
         if "usde" in p.get("symbol", "").lower()
-        and p.get("tvlUsd", 0) > 0
+        and float(p.get("tvlUsd") or 0) > 0
     ]
-    filtered.sort(key=lambda x: x.get("tvlUsd", 0), reverse=True)
+    filtered.sort(key=lambda x: float(x.get("tvlUsd") or 0), reverse=True)
     top = filtered[:n]
     if not top:
         return pd.DataFrame()
     cols = ["chain", "project", "symbol", "tvlUsd", "apy"]
-    return pd.DataFrame(top)[[c for c in cols if c in pd.DataFrame(top).columns]].head(n)
+    df = pd.DataFrame(top)
+    return df[[c for c in cols if c in df.columns]].head(n)
+
+
+def fetch_usde_price_coingecko(days: int = 365) -> pd.DataFrame:
+    """USDe daily price from CoinGecko (free API, no key needed)."""
+    url = (
+        "https://api.coingecko.com/api/v3/coins/ethena-usde/market_chart"
+        f"?vs_currency=usd&days={days}&interval=daily"
+    )
+    r = requests.get(url, timeout=_TIMEOUT, headers={"Accept": "application/json"})
+    r.raise_for_status()
+    prices = r.json().get("prices", [])
+    if not prices:
+        return pd.DataFrame(columns=["date", "price"])
+    df = pd.DataFrame(prices, columns=["ts_ms", "price"])
+    df["date"] = pd.to_datetime(df["ts_ms"], unit="ms")
+    return df[["date", "price"]].sort_values("date").reset_index(drop=True)
