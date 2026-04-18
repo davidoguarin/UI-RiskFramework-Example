@@ -1,0 +1,65 @@
+# Ethena (USDe / sUSDe)
+age_years: 2.1                 # ✔ Mainnet launch Feb 19, 2024 → ~2 yrs as of Apr 2026
+tvl_vol_pct: 0.054           # ✔ Year-avg of monthly realized vol from daily TVL
+                             #   Method: stddev(daily log-returns) × sqrt(30) per month,
+                             #   averaged over trailing 12 complete months (Apr 2025–Mar 2026).
+                             #   Unscaled avg = 0.0098; × sqrt(30) = 0.054
+                             #   (DeFiLlama api.llama.fi/protocol/ethena, 844 daily points)
+audits_by_auditor:
+  - auditor: Pashov
+    n_audits: 5              # ✔ Oct 2023, Dec 2023, May 2024, Sep 2024, Oct 2024 (USDTB)
+  - auditor: Code4rena
+    n_audits: 2              # ✔ Public contest Nov 2023; invitational Nov 4–11, 2024
+  - auditor: Quantstamp
+    n_audits: 2              # ✔ Oct 2023 (v1), Oct 2024 (USDTB)
+  - auditor: Spearbit
+    n_audits: 1              # ✔ Oct 2023
+  - auditor: Zellic
+    n_audits: 1              # ✔ Jun–Jul 2023 (pre-launch)
+  - auditor: Cyfrin
+    n_audits: 1              # ✔ Oct 31, 2024 (USDTB)
+  - auditor: Chaos Labs
+    n_audits: 1              # ✔ 2024 economic/financial risk analysis
+months_since_audit: 17       # ⚠ Most recent confirmed: Code4rena invitational Nov 2024
+                             #   → ~17 months as of Apr 2026; more recent audits may exist
+n_critical_exploits: 0       # ✔ Sep 2024 frontend/registrar breach — protocol funds safe;
+                             #   fake ENA token exploit (~$290K) was unrelated to Ethena protocol;
+                             #   Bybit exposure Feb 2025 — USDe remained solvent; no smart
+                             #   contract critical exploit or confirmed loss-of-funds
+Delta_Critical: 0            # No USDe/sUSDe depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 24   # ✔ Chainlink sUSDe/USD feed: 86,400s (24h); USDe/USD: 82,800s
+                             #   (~23h). Internal minting uses off-chain signed orders (no
+                             #   on-chain oracle in EthenaMinting.sol)
+oracle_deviation: 0.005      # ✔ 0.5% — Chainlink USDe/USD and sUSDe/USD feeds on Ethereum
+tvl: 6640000000              # ✔ ~$6.64B (DeFiLlama, Apr 2026)
+
+validator_services: null  # Ethena does not operate validators
+# Counterparty protocols: CEXes used for delta-neutral ETH/BTC short positions
+# (excludes oracle providers and self-issued tokens like USDe/sUSDe)
+counterparty_protocols:
+  - name: Binance
+    category: centralized_exchange
+  - name: Bybit
+    category: centralized_exchange
+  - name: OKX
+    category: centralized_exchange
+  - name: Deribit
+    category: centralized_exchange
+oracle_diversification:  # source: existing repo comments (Chainlink feed usage)
+  provider_count: 1  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+# multisig_requirements — verified vs Ethena public docs (Apr 2026):
+#   - Owner: https://docs.ethena.fi/solution-design/overview/github-overview
+#     (“Owner of Ethena's smart contracts”: Gnosis Safe, ≥7-of-10 confirmations; Safe UI:
+#     https://app.safe.global/home?safe=eth:0x3B0AAf6e6fCd4a7cEEf8c92C32DFeA9E64dC1862)
+#   - Mint roles: https://docs.ethena.fi/solution-design/minting-usde/mint-and-redeem-key-functions
+#     (ADMIN = Multi-Sig; MINTER/REDEEMER = EOAs — executing mint/redeem is not the 7/10 path)
+multisig_requirements:
+  # Same 7/10 owner Gnosis Safe as below; docs also state this Safe does not custody user funds (see URLs in block above).
+  funds_movement: "7/10"  # https://docs.ethena.fi/solution-design/overview/github-overview
+  contract_changes: "7/10"  # upgrade/own contracts — Overview Safe, ≥7-of-10; URLs in block above
+  parameter_changes: "7/10"  # mint-and-redeem-key-functions + Overview (urls above)
+  # EthenaMinting ADMIN multisig (same governance family); executing mint calls use MINTER EOAs — roles table:
+  # https://docs.ethena.fi/solution-design/minting-usde/mint-and-redeem-key-functions
+  minting: "7/10"

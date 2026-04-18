@@ -1,0 +1,29 @@
+# Simulation parameters – edit this file only.
+# All monetary/return values are in decimal form (e.g. 0.10 = 10%).
+
+# nu: Student-t degrees of freedom. Lower = fatter tails, more extreme moves (e.g. 3–5 for crypto). Higher (>10) ≈ normal.
+nu: 4.0
+
+# --- Time ---
+# horizon_days: total simulation length in days (e.g. 30, 60, 90).
+horizon_days: 30
+
+# step_days: length of one step in days (e.g. 1 = daily). Number of steps = horizon_days / step_days.
+step_days: 1
+
+# --- Monte Carlo ---
+# n_paths: number of independent NAV paths to simulate (e.g. 10_000–100_000).
+n_paths: 100000
+
+# confidence: VaR/CVaR level (e.g. 0.95 = 95th percentile; 0.99 = 99th). Fraction of worst outcomes used for CVaR.
+confidence: 0.95
+
+# seed: random seed for reproducibility. Set to null or omit for different run each time.
+seed: 32
+
+# --- Jump model (shared across strategies) ---
+# Base jump probability multiplier. Per protocol:
+#   jump_probability_i = jump_probability * PRS_i 
+jump_probability: 0.00055  # 1/(365*5) a crash every 5 years 
+# Jump loss volatility (same for all protocols).
+jump_volatility: 0.1

@@ -1,0 +1,8 @@
+# cbBTC (treated as an asset in simulation jump model)
+category: asset
+# Monthly volatility used as jump probability multiplier for assets:
+#   jump_probability_i = base_jump_probability * daily_volatility
+monthly_volatility: 0.04
+Delta_Critical: 0  # No cbBTC depeg <0.9 or qualifying freeze/governance attack in last month
+validator_services: null  # cbBTC is an asset wrapper; no validator operations
+counterparty_protocols: null  # Asset; S_CDiv not applicable

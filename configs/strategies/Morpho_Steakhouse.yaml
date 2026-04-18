@@ -1,0 +1,22 @@
+portfolio:
+  # Total portfolio size (same unit as each protocol TVL)
+  p_tot: 20000000
+
+strategy:
+  liquidation:
+    enabled: false
+  simulation:
+    volatility_annual: 0.01
+    apy_min: 0.025
+    apy_max: 0.04
+    strategy_name: Morpho Steakhouse
+  # Protocols included in this strategy scenario.
+  protocols:
+    # Protocol display name (must match the intended protocol config file mapping)
+    - name: lido
+      alloc_max_pct: 10
+    - name: WBTC
+      alloc_max_pct: 20
+    - name: CBBTC
+      alloc_max_pct: 70
+

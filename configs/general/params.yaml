@@ -1,0 +1,50 @@
+parameters:
+  # lambda (λ): maturity decay for S_Maturity = exp(-λ * age_years)
+  # Higher values create clearer separation: older protocols get much lower risk.
+  lambda: 0.3
+  # mu (μ): scales S_Maturity contribution inside PRS
+  mu: 1
+  # eta (η): TVL-volatility sensitivity for S_sigmaTVL = 1 - exp(-η * tvl_vol_pct)
+  eta: 3
+  # kappa (κ): exploit-count sensitivity for S_CE = 1 - exp(-κ * n_critical_exploits)
+  kappa: 1.5
+  # zeta (ζ): scales time-since-last-audit in PRS (ζ * min(months_since_audit / T_max_months, 1))
+  zeta: 0.5
+  # rho (ρ): scales S_OH = ρ * (1 - exp(-oracle_heartbeat_hours)) (ρ outside the exponential)
+  rho: 0.2
+  # xi (ξ): oracle deviation sensitivity for S_OD = 1 - exp(-ξ * D); D = oracle_deviation (protocol YAML)
+  xi: 2
+  # alpha (α): weight for concentration term inside the sum Σ(α * w_i^2)
+  alpha: 0.2
+  # beta (β): weight on Σ θ_i in PCR_vault
+  beta: 10
+  # gamma (γ): scales average protocol risk (γ/N)*Σ PRS_i in PCR_vault
+  gamma: 0.2
+  # delta_crs (δ_crs): weight on (1/N)*Σ CRS_i in CRS_portfolio
+  delta_crs: 0.5
+  # omega_pds (ω_pds): weight on allocation concentration w_i^2 inside each CRS_i (Σ w_i^2 = PDS)
+  omega_pds: 0.2
+  # Multisig Risk Score S_MS = 1 - exp(-φ * Σ w_k T_k/N_k²); PRS adds ν * S_MS
+  # φ (phi): scales the multisig exponent (γ in the written formula; named phi here to avoid clash with PCR γ)
+  phi: 1.0
+  # ν (nu): weight on S_MS inside PRS_i
+  nu: 1.0
+  w_u: 1.0   # U: contract_changes (upgrades)
+  w_f: 1.0   # F: funds_movement
+  w_p: 1.0   # P: parameter_changes
+  w_m: 0.2   # M: minting (1/5 of other w_k)
+  # Conservative T/N when a field is unknown / not parseable as m/n (default T/N² = 1/1²)
+  sms_unknown_t: 1
+  sms_unknown_n: 1
+  # V2 counterparty controls
+  chi: 1.0
+  psi_oracle_div: 1.0
+  # omega_cdiv (ω_cdiv): weight on S_CDiv,i = Σ_j w²_div * Q_j inside each CRS_i
+  # S_CDiv measures quality-weighted counterparty protocol concentration (excl. oracles/validators)
+  omega_cdiv: 0.2
+  # N_ref: operator-count reference for decentralisation: exp(-n_operators / N_ref) → 0 as n → N_ref
+  N_ref: 50
+  # tau_v (τ_v): validator slashing sensitivity for S_VOps = 1 - exp(-τ_v * slashing_events / age_years)
+  tau_v: 0.5
+  # iota (ι): multiplier on (S_VDec + S_VOps) when validator_services.has_slashing_insurance is true; else 1.0
+  iota: 0.8

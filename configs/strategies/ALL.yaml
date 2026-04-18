@@ -1,0 +1,43 @@
+portfolio:
+  # Total portfolio size (same unit as each protocol TVL)
+  p_tot: 20000000
+
+strategy:
+  liquidation:
+    enabled: false
+  # Strategy-specific simulation inputs.
+  simulation:
+    # volatility_annual: standard deviation of strategy returns per year.
+    volatility_annual: 0.02
+    # apy_min / apy_max: expected return (APY) range per year.
+    apy_min: 0.035
+    apy_max: 0.045
+    # strategy_name: label used in simulation output.
+    strategy_name: USDC Lending Bluechip
+  # Protocols included in this strategy scenario.
+  protocols:
+    # Protocol display name (must match the intended protocol config file mapping)
+    - name: pendle
+      alloc_max_pct: 20
+    - name: silo
+      alloc_max_pct: 25
+    - name: maple
+      alloc_max_pct: 20
+    - name: idle
+      alloc_max_pct: 15
+    - name: clearpool
+      alloc_max_pct: 10
+    - name: ethena
+      alloc_max_pct: 20
+    - name: aave
+      alloc_max_pct: 20
+    - name: lido
+      alloc_max_pct: 20
+    - name: compound
+      alloc_max_pct: 20
+    - name: fluid
+      alloc_max_pct: 20
+    - name: resolv_pre_exploit
+      alloc_max_pct: 20
+    - name: resolv_post_exploit
+      alloc_max_pct: 20

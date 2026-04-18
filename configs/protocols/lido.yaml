@@ -1,0 +1,35 @@
+# Lido
+age_years: 5                 # ✔ Launch Dec 2020
+tvl_vol_pct: 0.0546             # ⚠ Proxy
+audits_by_auditor:
+  - auditor: Certora
+    n_audits: 7              # ⚠ Approx
+  - auditor: Consensys Diligence
+    n_audits: 4              # ⚠ Approx
+  - auditor: MixBytes
+    n_audits: 16             # ⚠ Approx (most frequent auditor)
+months_since_audit: 3        # ✔ Dec 2025 audits
+n_critical_exploits: 0       # ✔ No loss-of-funds exploit
+Delta_Critical: 0            # No stETH depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 24   # ⚠ ~daily; not a fixed heartbeat
+oracle_deviation: 0.02         # ✔ Multi-oracle worst-case: Chainlink stETH/ETH = 0.5–2%; stETH/USD = 1%; worst-case = 2%
+tvl: 20000000000            # ✔ ~$18–20B (DeFiLlama range, Mar 2026)
+
+oracle_diversification:  # source: existing repo comments (Lido docs + Chainlink integration notes)
+  provider_count: 2  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Lido Oracle Committee
+    - Chainlink
+counterparty_protocols: null  # Native LST protocol; no external DeFi protocol dependencies
+validator_services:  # source: Lido node operator registry + client diversity reports (docs.lido.fi)
+  n_operators: 40                    # ✔ ~40 curated active node operators (LDO DAO-approved)
+  operator_set_type: "dao-curated"   # ✔ LDO governance votes on operator admission/removal
+  client_diversity_dominant_pct: 0.37  # ✔ ~37% Prysm (Lido client diversity reports, 2025)
+  slashing_events: 3                 # ✔ handful of minor slashing incidents over 5-year history
+  has_slashing_insurance: true       # ✔ Lido node operator penalty coverage mechanism in place
+multisig_requirements:  # many committee Safes with different quorums — https://docs.lido.fi/multisigs/committees/
+  funds_movement: "3/5"  # repo comment — cross-check committees page (examples: 4/8 LEGO, 3/6 Rewards Share, etc.)
+  contract_changes: "5/7"  # repo comment — verify intended committee
+  parameter_changes: "5/7"  # repo comment — verify intended committee
+  # stETH is minted/burned by protocol on stake/unstake; not an m/n multisig “mint approval” per deposit — https://docs.lido.fi/
+  minting: "N/A"

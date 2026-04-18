@@ -1,0 +1,39 @@
+# Clearpool
+age_years: 4                 # ⚠ DeFiLlama first TVL data 2022-04-11 (~4 yrs); TGE was Oct 2021 but permissionless pools launched Apr–May 2022
+tvl_vol_pct: 0.262           # ✔ Year-avg of monthly realized vol from daily TVL
+                             #   Method: stddev(daily log-returns) × sqrt(30) per month,
+                             #   averaged over trailing 12 complete months (Apr 2025 – Mar 2026)
+audits_by_auditor:
+  - auditor: Pessimistic
+    n_audits: 4              # ✔ Permissionless × 2 + Permissionless+Staking + Dynamic/Permissionless (May 2022 – 2023)
+  - auditor: MixBytes
+    n_audits: 1              # ✔ Dynamic/Permissionless (March 2023)
+  - auditor: Hacken
+    n_audits: 2              # ✔ Prime (April 2023) + Prime Protocol (January 2025)
+  - auditor: Decurity
+    n_audits: 1              # ✔ Credit Vaults (2024)
+  - auditor: Sherlock
+    n_audits: 1              # ✔ Credit Vaults (September 2024)
+  - auditor: Cantina
+    n_audits: 1              # ✔ Credit Vaults (August 2024)
+months_since_audit: 15       # ✔ Most recent: Hacken Prime Protocol audit January 2025 → 15 months to April 2026
+n_critical_exploits: 0       # ✔ No known smart-contract exploits or loss-of-funds incidents reported
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 24   # ⚠ PayFi vaults use Chainlink/Redstone rate providers; maxTimeFromLastUpdate = 86400 s (chains/1.json). IRM governance uses CPOOL-staking oracles voting every 2 weeks — not a price feed
+oracle_deviation: 0.000      # ⚠ No on-chain deviation threshold configured; staleness enforced solely via maxTimeFromLastUpdate. Stablecoins on Flare pegged to base (no price feed). Set to 0 to indicate N/A.
+tvl: 41894352                # ✔ $41,894,352 (DeFiLlama, Apr 2026); majority on Flare (~$41.4M), remainder on Ethereum/other chains
+
+validator_services: null  # Clearpool does not operate validators
+counterparty_protocols: null  # Direct credit lending; no external DeFi protocol dependencies
+oracle_diversification:  # source: Clearpool docs + existing repo comments
+  provider_count: 3  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+    - RedStone
+    - Clearpool Oracle Staking
+multisig_requirements:  # Tokenomics (treasury/team multisig cold storage): https://docs.clearpool.finance/clearpool/token/cpool/tokenomics
+  funds_movement: "unknown"  # no public m/n on that page — confirm Safe on Etherscan
+  contract_changes: "unknown"  # CPOOL governance docs — https://docs.clearpool.finance/clearpool/
+  parameter_changes: "unknown"  # oracle/IRM voting per governance pages — same docs hub
+  # Pool LP token minting from liquidity supply; no published mint-controller multisig threshold in official docs reviewed.
+  minting: "unknown"

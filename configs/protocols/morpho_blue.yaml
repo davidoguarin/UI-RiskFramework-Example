@@ -1,0 +1,37 @@
+#Morpho Bluw
+age_years: 2                 # ⚠ Mainnet Dec 2022 → ~2.25 yrs; founded Aug 2021 → ~4 yrs
+tvl_vol_pct: 40              # ⚠ Proxy; no standard metric
+audits_by_auditor:
+  - auditor: Spearbit/Cantina
+    n_audits: 8              # ✔ Most frequent auditor per official docs
+  - auditor: OpenZeppelin
+    n_audits: 3              # ✔ Confirmed in audit list
+  - auditor: Certora
+    n_audits: 3              # ✔ Confirmed in audit list
+  - auditor: ChainSecurity
+    n_audits: 1
+  - auditor: Zellic
+    n_audits: 1
+months_since_audit: 3        # ✔ Dec 2025 audits (Certora + Spearbit)
+n_critical_exploits: 0       # ✔ Apr 2025 frontend issue → funds rescued, no protocol exploit
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 24   # ✔ Multi-oracle worst-case: API3 confirmed 24h-only heartbeat; applied across 5 providers
+oracle_deviation: 0.02        # ✔ Multi-oracle worst-case: Chainlink less-liquid feeds at 2%; worst-case across 5 providers
+tvl: 6000000000             # ✔ ~$6B (DeFiLlama, Mar 2026)
+
+validator_services: null  # Morpho does not operate validators
+counterparty_protocols: null  # Base lending infrastructure; no external protocol dependencies
+oracle_diversification:  # source: existing repo comments (Morpho docs/forum)
+  provider_count: 5  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+    - Pyth
+    - RedStone
+    - Chronicle
+    - API3
+multisig_requirements:  # Morpho org page (Apr 2026): https://docs.morpho.org/learn/governance/organization/
+  funds_movement: "5/9"  # morpho.eth governance Safe — same page
+  contract_changes: "5/9"  # MORPHO token contract ownership / DAO executors — same page
+  parameter_changes: "5/9"  # fee switch, LLTV/IRM whitelist, etc. — implemented via governance multisig — same page
+  # No collateral-backed stablecoin “mint”; interest-bearing positions are not Ethena-style minted supply.
+  minting: "N/A"

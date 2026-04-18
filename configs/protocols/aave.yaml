@@ -1,0 +1,30 @@
+# Aave
+age_years: 6                 # ⚠ V1=Jan 2020 (6 yrs), V2=Nov 2020 (5 yrs); 6 more precise
+tvl_vol_pct: 0.0288          # calculated over a year monthly volatility
+audits_by_auditor:
+  - auditor: Certora
+    n_audits: 6              # ⚠ Approx; formal verification across V2/V3
+  - auditor: OpenZeppelin
+    n_audits: 4              # 
+  - auditor: Trail of Bits
+    n_audits: 3              # 
+months_since_audit: 3        # ✔ Dec 2025 audits confirmed
+n_critical_exploits: 0       # ✔ Bad debt events (e.g. CRV position Nov 2023)
+Delta_Critical: 0            # No depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 24  # ✔ Multi-oracle worst-case: Aave uses feeds for many assets; some (stablecoins, LSTs) have 24h heartbeat
+oracle_deviation: 0.02        # ✔ Multi-oracle worst-case: Chainlink max for less-liquid assets = 2%; no Chainlink feed has 2.7%
+tvl: 25000000000            # ✔ ~$25B (DeFiLlama, Mar 2026)
+
+validator_services: null  # Aave does not operate validators
+counterparty_protocols: null  # Base lending protocol; no external protocol dependencies
+oracle_diversification:  # source: Aave docs + existing repo comments
+  provider_count: 2  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+    - Aave CAPO
+multisig_requirements:  # AAVE token page documents AFC = 3-of-4 multisig for buybacks: https://aave.com/docs/ecosystem/aave — other Safes differ
+  funds_movement: "3/5"  # repo placeholder; cross-check live Safe thresholds (not necessarily AFC)
+  contract_changes: "5/9"  # repo comment — verify vs current Guardian / stewards documentation
+  parameter_changes: "5/9"  # same — Aave governance docs + forum
+  # GHO: facilitators & bucket roles are governance-controlled — https://aave.com/docs/ecosystem/gho (not a single fixed Safe m/n).
+  minting: "unknown"

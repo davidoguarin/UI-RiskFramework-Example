@@ -1,0 +1,45 @@
+# Maple Finance (Syrup)
+age_years: 4.9               # ✔ Mainnet launch May 12 2021; ~4.9 yrs as of Apr 2026
+tvl_vol_pct: 0.247           # ✔ Year-avg of monthly realized vol from daily TVL
+                             #   Method: stddev(daily log-returns) × sqrt(30) per month,
+                             #   averaged over trailing 12 complete months (Apr 2025–Mar 2026)
+audits_by_auditor:
+  - auditor: Three Sigma
+    n_audits: 5              # ✔ Dec 2022, Jun 2023, Dec 2023, Aug 2024, Dec 2024
+  - auditor: 0xMacro
+    n_audits: 4              # ✔ Dec 2023, Aug 2024, Dec 2024, Sep 2025
+  - auditor: Spearbit
+    n_audits: 2              # ✔ Dec 2022, Nov 2025
+  - auditor: Sherlock
+    n_audits: 2              # ✔ Sep 2025, Nov 2025
+  - auditor: Trail of Bits
+    n_audits: 1              # ✔ Dec 2022
+  - auditor: Cantina
+    n_audits: 1              # ✔ Jun 2023 (Spearbit engagement via Cantina marketplace)
+  - auditor: Dedaub
+    n_audits: 1              # ✔ Jan 2026
+  - auditor: Sigma Prime
+    n_audits: 1              # ✔ Jan 2026
+months_since_audit: 3        # ✔ Most recent: Sigma Prime Jan 2026 (~3 months before Apr 2026)
+n_critical_exploits: 0       # ✔ Orthogonal Trading $36M default (Dec 2022) was a credit default
+                             #   (borrower insolvency/misrepresentation), NOT a smart contract exploit.
+                             #   No protocol-level smart contract hacks on record.
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 1    # ✔ Chainlink ETH/USD (0x5f4eC3…) and BTC/USD (0xF40300…) feeds;
+                             #   Chainlink native heartbeat = 3600 s (1 h) on Ethereum mainnet.
+                             #   Maple Globals maxDelay (staleness guard) = 14400 s (4 h) on-chain.
+oracle_deviation: 0.005      # ✔ Chainlink ETH/USD and BTC/USD deviation threshold = 0.5%
+tvl: 1781500787              # ✔ ~$1.78 B (DeFiLlama api.llama.fi/protocol/maple-finance, Apr 10 2026)
+
+validator_services: null  # Maple does not operate validators
+counterparty_protocols: null  # Direct credit lending; no external DeFi protocol dependencies
+oracle_diversification:  # source: existing repo comments (Maple docs + Aave ARFC context)
+  provider_count: 1  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+multisig_requirements:  # Emergency pause (multisig) + governance: https://maplefinance.gitbook.io/maple/technical-resources/security/security
+  funds_movement: "4/7"  # repo comment — verify vs current Maple/Syrup governance disclosures
+  contract_changes: "4/7"  # same
+  parameter_changes: "4/7"  # same
+  # syrUP / pool shares minted from deposits; pause path documented — https://docs.maple.finance/technical-resources/security/emergency-protocol-pause (no m/n in page body)
+  minting: "unknown"

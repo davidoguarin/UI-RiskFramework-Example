@@ -1,0 +1,30 @@
+# Compound
+age_years: 7.5                 # ✔ Mainnet Sept 2018 → ~7.5 years
+tvl_vol_pct: 0.0187         # ⚠ Proxy; plausible relative to Aave
+audits_by_auditor:
+  - auditor: OpenZeppelin
+    n_audits: 4              # ✔ Confirmed (multiple audits of V2 and V3)
+  - auditor: Trail of Bits
+    n_audits: 3              # ✔ Confirmed
+  - auditor: Certora
+    n_audits: 3              # ✔ Confirmed (formal verification work)
+months_since_audit: 12       # ⚠ No strong evidence of audits post-2024
+n_critical_exploits: 1       # ⚠ Both events (Sep + Oct 2021) stem from same bug;
+                              #   categorization depends on your exploit definition
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 1   # ⚠ Chainlink-based; feed-dependent
+oracle_deviation: 0.005         # ✔ Chainlink ETH/USD confirmed 0.5% deviation threshold (single provider)
+tvl: 1300000000             # ✔ ~$1.25–1.4B (DeFiLlama Compound V3, Mar 2026)
+
+validator_services: null  # Compound does not operate validators
+counterparty_protocols: null  # Base lending protocol; no external protocol dependencies
+oracle_diversification:  # source: existing repo comments (Compound docs/Configurator)
+  provider_count: 1  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+multisig_requirements:  # Pause Guardian / Community Multi-Sig: https://compound.finance/docs/governance
+  funds_movement: "4/8"  # verify live threshold on Safe for 0xbbf3f1421d886e9b2c5d716b5192ac998af2012c — governance doc links Etherscan
+  contract_changes: "unknown"  # primarily COMP + Timelock governance — same doc
+  parameter_changes: "4/8"  # borrow caps etc. may route via Timelock/governance — same doc
+  # cToken mint is end-user supply; Pause Guardian can disable Mint among other actions — governance doc § Pause Guardian.
+  minting: "unknown"

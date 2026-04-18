@@ -1,0 +1,36 @@
+# Liquidation risk simulation — strategy: USDC lend and ETH borrow
+# All monetary/return values are in decimal form (e.g. 0.10 = 10%).
+
+# --- Time and Monte Carlo ---
+horizon_days: 30
+step_days: 1
+n_paths: 100000
+seed: 2
+
+# --- Positions ---
+# This file holds a single position (one named strategy).
+positions:
+  - name: "USDC lend and ETH borrow"
+    weight: 1     # In this case the weight does not matter because the whole portfolio is allocated to a single loop.
+    nu: 4.0           # Student-t df for this strategy
+    borrowed:         # Data for ETH, the borrowed asset (volatility per month)
+      volatility_monthly: 0.4
+      apy_min: -0.02
+      apy_max: -0.04
+    legs:
+      - name: "Collateral leg 1" # Data for USDC
+        ltv_target: 0.6
+        ltv_liq: 0.85
+        rho: 0.00
+        collateral:
+          volatility_monthly: 0.01
+          apy_min: 0.02
+          apy_max: 0.05
+      - name: "Collateral leg 2" # Data for wstETH
+        ltv_target: 0.9
+        ltv_liq: 0.95
+        rho: 0.98
+        collateral:
+          volatility_monthly: 0.40
+          apy_min: 0.0001
+          apy_max: 0.0005

@@ -1,0 +1,29 @@
+portfolio:
+  # Total portfolio size (same unit as each protocol TVL)
+  p_tot: 20000000
+
+strategy:
+  liquidation:
+    enabled: false
+  simulation:
+    volatility_annual: 0.01
+    apy_min: 0.032
+    apy_max: 0.067
+    strategy_name: Morpho Gauntlet Core
+  # Protocols included in this strategy scenario.
+  protocols:
+    # Protocol display name (must match the intended protocol config file mapping)
+    - name: pendle
+      alloc_max_pct: 40
+    - name: maple
+      alloc_max_pct: 20
+    - name: idle
+      alloc_max_pct: 10
+    - name: clearpool
+      alloc_max_pct: 10
+    - name: ethena
+      alloc_max_pct: 20
+    - name: Resolv post Exploit
+      alloc_max_pct: 30
+    - name: compound
+      alloc_max_pct: 10

@@ -1,0 +1,27 @@
+# Fluid
+age_years: 2                 # ✔ Recent protocol (~2024 relaunch of Instadapp Lite)
+tvl_vol_pct: 0.0318            # ⚠ Proxy; newer protocol = higher volatility expected
+audits_by_auditor:
+  - auditor: MixBytes
+    n_audits: 2              # ✔ Confirmed
+months_since_audit: 0        # ✔ Mar 2026 audit
+n_critical_exploits: 0       # ✔ No known exploits
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 1   # ✔ Chainlink primary feed = 1h (3600s); Uniswap TWAP is continuous
+oracle_deviation: 0.005       # ✔ Chainlink primary feed = 0.5%; RedStone ~0.5%; 0.9% not verified
+tvl: 1000000000             # ⚠ DeFiLlama shows Fluid Lending ~$700M–1.2B; mid-range ~$1B
+
+validator_services: null  # Fluid does not operate validators
+counterparty_protocols: null  # Base lending protocol; no external protocol dependencies
+oracle_diversification:  # source: web/docs hints + existing repo comments (low confidence)
+  provider_count: 3  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+    - RedStone
+    - Uniswap TWAP
+multisig_requirements:  # Fluid launch / governance: https://gov.fluid.io/t/fluid-launch-proposal/685
+  funds_movement: "unknown"  # treasury/ops multisigs referenced in governance posts; confirm threshold on Safe/Etherscan
+  contract_changes: "unknown"  # INST DAO / timelock — follow live governance; see gov.fluid.io & Atlas
+  parameter_changes: "unknown"  # Guardian can pause (cannot move funds per launch proposal text) — verify roles on-chain
+  # fToken supply increases on user deposit; new fToken deployment was “team multisig as deployer” at launch — no public m/n here.
+  minting: "unknown"

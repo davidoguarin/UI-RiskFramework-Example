@@ -1,0 +1,44 @@
+# Silo Finance
+age_years: 3.62              # ✔ Beta mainnet launch Aug 22 2022; ~3.6 yrs to Apr 2026
+tvl_vol_pct: 0.203           # ⚠ Year-avg of monthly realized vol from daily TVL
+                             #   Method: stddev(daily log-returns) × sqrt(30) per month,
+                             #   averaged over trailing 12 complete months (Apr 2025–Mar 2026)
+audits_by_auditor:
+  - auditor: Certora
+    n_audits: 6              # ✔ V2 (Nov 2024, May 2025), Vaults (Apr 2025), Leverage (Jul 2025), dIRM, formal verifications
+  - auditor: Enigma Dark
+    n_audits: 2              # ✔ Silo V2 (May 2025), Silo V3
+  - auditor: Spearbit/Cantina
+    n_audits: 2              # ✔ V2 contest (Jan–Feb 2025), dIRM
+  - auditor: Sigma Prime
+    n_audits: 2              # ✔ Silo V2 assessment, Silo Vaults (Mar 2025)
+  - auditor: Code4rena
+    n_audits: 2              # ✔ Silo Finance contest (Mar 2025), Mitigation Review (May 2025)
+  - auditor: ChainSecurity
+    n_audits: 1              # ✔ Curve & Convex feature audit (V1 era)
+  - auditor: Quantstamp
+    n_audits: 1              # ✔ V1 audit
+  - auditor: ABDK
+    n_audits: 1              # ✔ V1 audit
+months_since_audit: 9        # ⚠ Most recent: Certora Leverage audit Jul 2025 (~9 months to Apr 2026)
+n_critical_exploits: 1       # ⚠ Jun 2025: $545K lost from pre-release leverage module (DAO funds only; core protocol/user funds unaffected)
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 24   # ⚠ Chainlink primary oracle; Silo configs set 87001s (~24h) for most mainnet feeds; ETH/USD uses 1h
+oracle_deviation: 0.01       # ✔ Multi-oracle worst-case: DIA uses 1–2% deviation for crypto assets; worst-case across 4 providers
+tvl: 39765048                # ✔ $39.8M (DeFiLlama, Apr 5 2026)
+
+validator_services: null  # Silo does not operate validators
+counterparty_protocols: null  # Base lending protocol; no external protocol dependencies
+oracle_diversification:  # source: existing repo comments (Silo docs/oracle-agnostic)
+  provider_count: 4  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+    - Pyth
+    - RedStone
+    - DIA
+multisig_requirements:  # Protocol overview / roles: https://devdocs.silo.finance/ — confirm owner Safe per deployment
+  funds_movement: "unknown"
+  contract_changes: "unknown"
+  parameter_changes: "unknown"
+  # Vault share tokens on deposit/borrow; no public Safe m/n for “mint” surfaced in developer overview above.
+  minting: "unknown"

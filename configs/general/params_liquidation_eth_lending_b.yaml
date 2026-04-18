@@ -1,0 +1,28 @@
+# Liquidation risk simulation — strategy: ETH Lending B
+# All monetary/return values are in decimal form (e.g. 0.10 = 10%).
+
+# --- Time and Monte Carlo ---
+horizon_days: 30
+step_days: 1
+n_paths: 100000
+seed: 2
+
+# --- Positions ---
+# This file holds a single position (one named strategy).
+positions:
+  - name: "ETH Lending B"
+    weight: 1 # in this case the weight does not matter because the whole portfolio is allocated to a single loop.
+    nu: 4.0
+    borrowed:        # Data for ETH, the borrowed asset (volatility per month)
+      volatility_monthly: 0.4
+      apy_min: -0.02
+      apy_max: -0.04
+    legs:
+      - name: "Single collateral leg" # Data for wstETH only collateral in this strategy
+        ltv_target: 0.9
+        ltv_liq: 0.95
+        rho: 0.99
+        collateral:
+          volatility_monthly: 0.40
+          apy_min: 0.0001
+          apy_max: 0.0005

@@ -1,0 +1,49 @@
+# Euler V2
+age_years: 1                 # ✔ V2 mainnet Sep 4, 2024 → ~1.5 years
+                             # ⚠ V1 launched Dec 2021 but was sunset
+                             #   post-hack; V2 is a full rebuild — using
+                             #   V2 age is the more conservative anchor
+
+tvl_vol_pct: 0.0217              # ⚠ Proxy; higher than Aave/Compound/Morpho
+
+audits_by_auditor:
+  - auditor: Spearbit/Cantina
+    n_audits: 10             # ✔ Most frequent auditor across EVK/EVC/EPO
+                             #   modules; also ran $1.25M post-audit contest
+  - auditor: OpenZeppelin
+    n_audits: 4              # ✔ Confirmed in published audit list
+  - auditor: Trail of Bits
+    n_audits: 3              # ✔ Confirmed in published audit list
+  - auditor: Certora
+    n_audits: 3              # ✔ Formal verification; involved from design phase
+  - auditor: Zellic
+    n_audits: 3              # ✔ Confirmed
+  - auditor: ChainSecurity
+    n_audits: 2              # ✔ Confirmed
+  - auditor: yAudit
+    n_audits: 2              # ✔ Confirmed; including EPO oracle adapters
+months_since_audit: 3        # ⚠ V2 has ongoing audit cadence with each new
+n_critical_exploits: 1       # ✔ V1 flash loan exploit Mar 13, 2023: $197M
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 24   # ✔ Multi-oracle worst-case: Lido adapter updates ~24h; Chronicle can be 24h; EPO is vault-specific
+oracle_deviation: 0.02        # ✔ Multi-oracle worst-case: 7 providers, worst-case Chainlink (less-liquid) and Chronicle at ~2%
+tvl: 540000000               # ✔ DeFiLlama Euler V2: ~$485–543M Ethereum
+
+validator_services: null  # Euler does not operate validators
+counterparty_protocols: null  # Base lending protocol; no external protocol dependencies
+oracle_diversification:  # source: existing repo comments (Euler docs/oracle adapters)
+  provider_count: 7  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+    - Chronicle
+    - Pyth
+    - RedStone
+    - Uniswap V3
+    - Lido
+    - Balancer
+multisig_requirements:  # Pause/upgrade / DAO multisig roles: https://docs.euler.finance/security/pause-and-upgrade/
+  funds_movement: "4/8"  # Euler DAO treasury / ops multisigs — verify live (forum + Etherscan); example overview: docs.euler.finance/EUL/overview/
+  contract_changes: "unknown"  # Timelock + Security Council / DAO — pause-and-upgrade URL
+  parameter_changes: "unknown"  # risk steward / emergency roles per same doc hub
+  # Vault share tokens minted on supply; privileged roles are timelock/governance — not a single “mint multisig” in docs.
+  minting: "unknown"

@@ -1,0 +1,45 @@
+# Idle Finance
+age_years: 6.76              # ✔ Mainnet MVP launched July 2019 (ConsenSys hackathon); ~6.76 yrs as of Apr 2026
+tvl_vol_pct: 0.4343          # ⚠ Year-avg of monthly realized vol from daily TVL
+                             #   Method: stddev(daily log-returns) × sqrt(30) per month,
+                             #   averaged over trailing 12 complete months (Apr 2025–Mar 2026)
+                             #   High vol driven by Nov 2025 (~2.55) and Mar 2026 (~1.33) spikes on low-TVL base
+audits_by_auditor:
+  - auditor: Hans Friese
+    n_audits: 6              # ✔ Sep 2023 (Tranches v2), Aug/Oct/Oct 2024 (Credit Vaults), Nov 2024 ×2 (deposit/withdraw queue)
+  - auditor: Quantstamp
+    n_audits: 2              # ✔ Nov 2020 (Governance), Apr 2021 (Best Yield vaults)
+  - auditor: Consensys Diligence
+    n_audits: 1              # ✔ Jun 2021 (Tranches vaults)
+  - auditor: Certik
+    n_audits: 1              # ✔ Oct 2021 (Tranches vaults)
+  - auditor: Hats Finance
+    n_audits: 1              # ✔ Oct 2023 (Tranches vaults v2)
+months_since_audit: 17       # ✔ Most recent: Nov 2024 (Hans Friese, Credit Vaults withdraw queue); ~17 months to Apr 2026
+n_critical_exploits: 0       # ✔ No direct loss-of-funds exploit on Idle contracts; Mar 2023 Euler hack caused ~$5.8M
+                             #   indirect exposure (funds allocated to Euler); Idle contracts themselves were not exploited;
+                             #   $307k recovered via rapid contract pause. YFI 2021 vault exploit did not affect Idle.
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 23   # ✔ Chainlink USDC/USD feed on Ethereum mainnet: heartbeat = 82,800 s ≈ 23 h
+oracle_deviation: 0.0025     # ✔ Chainlink USDC/USD feed deviation threshold = 0.25%
+tvl: 4783094                 # ✔ $4,783,094 (DeFiLlama api.llama.fi/protocol/idle, most recent daily value 2026-03-25)
+
+validator_services: null  # Idle does not operate validators
+# Counterparty protocols: lending protocols Idle routes deposited funds to
+counterparty_protocols:
+  - name: Aave
+    category: idle_blue_chip_lending
+  - name: Compound
+    category: idle_blue_chip_lending
+  - name: Morpho Blue
+    category: idle_blue_chip_lending
+oracle_diversification:  # source: existing repo comments (Chainlink USDC/USD)
+  provider_count: 1  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Chainlink
+multisig_requirements:  # Idle Labs & other guardian Safes: https://docs.idle.finance/developers/best-yield/security-management-policy
+  funds_movement: "unknown"  # use treasury/ops Safe threshold relevant to movement — see security policy & Etherscan
+  contract_changes: "unknown"  # Timelock / GovernorBravo — https://docs.idle.finance/governance/idle-dao
+  parameter_changes: "unknown"  # same
+  # Guardian multisig can pause `mintIdleToken` — Idle Labs listed as 2/4 for senior BY — security-management-policy.md (same URL)
+  minting: "2/4"

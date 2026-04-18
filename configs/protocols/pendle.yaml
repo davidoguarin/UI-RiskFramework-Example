@@ -1,0 +1,48 @@
+# Pendle Finance
+age_years: 4.80              # ✔ Mainnet launched June 16, 2021; ~4.8 yrs as of Apr 2026
+tvl_vol_pct: 0.170           # ⚠ Year-avg of monthly realized vol from daily TVL
+                             #   Method: stddev(daily log-returns) × sqrt(30) per month,
+                             #   averaged over trailing 12 complete months (Apr 2025–Mar 2026)
+audits_by_auditor:
+  - auditor: Spearbit
+    n_audits: 2              # ✔ Jul 2024 (pendle-core-v2) + Aug 2025 (Boros); via GitHub portfolio
+  - auditor: ChainSecurity
+    n_audits: 2              # ✔ V2 Core 2024 + Boros Markets 2025; chainsecurity.com
+  - auditor: Ackee Blockchain
+    n_audits: 1              # ✔ V2 main codebase, Apr–May 2022
+  - auditor: Dedaub
+    n_audits: 1              # ✔ V2 main codebase, Jul 2022
+  - auditor: Least Authority
+    n_audits: 1              # ✔ V1 core contracts (pendle-core repo)
+  - auditor: WatchPug (independent)
+    n_audits: 6              # ⚠ Multiple engagements: main codebase, LP/PT oracle, marketV6/V7, sPendle
+months_since_audit: 8        # ✔ Most recent: Spearbit Aug 2025; ~8 months ago as of Apr 2026
+n_critical_exploits: 0       # ✔ No direct Pendle core exploit; Sep 2024 Penpie hack ($27M) was in a
+                             #   third-party protocol built on Pendle — Pendle core was unaffected
+Delta_Critical: 0            # No qualifying depeg <0.9, withdrawal freeze, or governance attack in the last month
+oracle_heartbeat_hours: 0    # ⚠ Pendle uses its own internal on-chain TWAP oracle (Uniswap V3-style),
+                             #   built into the AMM; updates every block (no push-based heartbeat)
+oracle_deviation: 0.000      # ⚠ No deviation threshold; TWAP window is 900s (15 min) recommended;
+                             #   price is derived continuously on-chain — no external push oracle
+tvl: 1776637924              # ✔ $1.78B (DeFiLlama api.llama.fi/protocol/pendle, Apr 10 2026)
+
+validator_services: null  # Pendle does not operate validators
+# Counterparty protocols: underlying yield sources whose tokens Pendle tokenizes
+# (excludes oracle providers; Pendle itself is the structured product wrapper)
+counterparty_protocols:
+  - name: Ethena
+    category: delta_neutral_stable
+  - name: Lido
+    category: major_lst
+  - name: Aave
+    category: idle_blue_chip_lending
+oracle_diversification:  # source: existing repo comments (Pendle internal TWAP)
+  provider_count: 1  # derived from providers list below
+  providers:  # oracle protocols used by the protocol
+    - Pendle Internal TWAP
+multisig_requirements:  # 2/4 Safe referenced e.g. https://forum.arbitrum.foundation/t/pendle-final-stip-round-1/17234 — confirm current ops Safe
+  funds_movement: "2/4"  # source: public forum disclosure above; re-verify on app.safe.global
+  contract_changes: "2/4"  # same caveat
+  parameter_changes: "2/4"  # same caveat
+  # PT/YT mint mechanics: https://docs.pendle.finance/pendle-v2/ProtocolMechanics/YieldTokenization/Minting (user-driven; multisig is ops/governance-adjacent)
+  minting: "2/4"

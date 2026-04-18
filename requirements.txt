@@ -1,0 +1,8 @@
+pyyaml>=6.0
+web3>=6.0.0
+numpy>=1.24
+scipy>=1.10
+streamlit>=1.35
+plotly>=5.20
+requests>=2.31
+pandas>=2.0
