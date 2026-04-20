@@ -488,7 +488,7 @@ def show_vault_strategy_section(all_protocols: dict, params: dict) -> None:
         )
 
         volatility_pct = st.slider(
-            "Portfolio volatility — year-average of monthly realized vol from daily TVL (%)",
+            "Portfolio main asset volatility — year-average of monthly realized vol from daily TVL (%)",
             min_value=1, max_value=100, value=30, step=1,
             help="Used as the annualized volatility input for the CVaR Monte Carlo simulation.",
         )
