@@ -132,7 +132,6 @@ def cached_top_usde_pools() -> pd.DataFrame:
 
 # ── CVaR simulation ───────────────────────────────────────────────────────────
 
-@st.cache_data(ttl=600, show_spinner=False)
 def run_strategy_cvar(
     protocol_stems: tuple[str, ...],
     alloc_values: tuple[float, ...],
