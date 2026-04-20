@@ -165,7 +165,7 @@ def run_strategy_cvar(
         else:
             mult, _ = compute_prs(proto, params)
         weight = max(0.0, alloc / 100.0)
-        jp_i   = float(np.clip(base_jp * mult, 0.0, 1.0))
+        jp_i   = float(np.clip(base_jp * mult * weight, 0.0, 1.0))
         jump_model.append({"weight": weight, "jump_probability": jp_i, "jump_mean_severity": 1.0})
 
     seed = int(sim.get("seed", 32))

@@ -99,9 +99,10 @@ def build_protocol_jump_model(strategy_path, base_jump_probability):
 
         alloc_pct = float(protocol.get("alloc_max_pct", 0.0))
         weight = max(0.0, alloc_pct / 100.0)
-        # Probability scales with PRS; severity is always 100% of the protocol's value.
-        # Portfolio impact = weight_i × 1.0, so concentration (large weight) drives tail risk.
-        jump_probability_i = float(np.clip(base_jump_probability * multiplier, 0.0, 1.0))
+        # jp_i ∝ prs_i × weight_i: portfolio jump frequency stays constant under diversification.
+        # Severity = 1.0 (total loss of protocol value); portfolio impact = weight_i × 1.0.
+        # Concentrated portfolios have the same portfolio jump rate but catastrophic per-event loss.
+        jump_probability_i = float(np.clip(base_jump_probability * multiplier * weight, 0.0, 1.0))
         jump_mean_severity_i = 1.0
         jump_model.append(
             {
