@@ -479,11 +479,17 @@ def show_vault_strategy_section(all_protocols: dict, params: dict) -> None:
                     format="%d%%",
                 )
 
+        def _guard_strategy_type():
+            st.session_state["_strategy_type"] = "Rebalancing"
+
         st.radio(
             "Strategy type",
-            options=["Rebalancing"],
+            options=["Rebalancing", "Leveraged Staking/Supply"],
+            index=0,
             horizontal=True,
-            help="Staked looping (involves liquidation risk) is disabled in this version.",
+            key="_strategy_type",
+            on_change=_guard_strategy_type,
+            help="Leveraged Staking/Supply (involves liquidation risk) is not available in this version.",
         )
 
         volatility_pct = st.slider(
