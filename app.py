@@ -542,16 +542,16 @@ def _show_strategy_results(
     m1.metric("PSR", f"{psr:.4f}",     help="Aggregated protocol quality risk")
     m2.metric("CRS", f"{crs_port:.4f}", help="Aggregated counterparty/oracle risk")
     m3.metric(f"CVaR_sum ({conf:.0%})", f"{cvar_sum:.2%}",
-               help=f"CVaR (no jumps) + CVaR (with jumps) over {horizon} days")
+               help=f"CVaR market + CVaR structural over {horizon} days")
     m4.metric("VSRS", f"{vsrs:.4f}", delta=None, help="PSR + CRS_portfolio + CVaR_sum")
 
     # ── CVaR detail ───────────────────────────────────────────────────────────
     with st.expander("CVaR simulation detail"):
         c1, c2 = st.columns(2)
-        c1.metric(f"VaR {conf:.0%}  (no jumps)",   f"{cvar_res['var_no_jump']:.2%}")
-        c1.metric(f"CVaR {conf:.0%} (no jumps)",   f"{cvar_res['cvar_no_jump']:.2%}")
-        c2.metric(f"VaR {conf:.0%}  (with jumps)", f"{cvar_res['var_with_jump']:.2%}")
-        c2.metric(f"CVaR {conf:.0%} (with jumps)", f"{cvar_res['cvar_with_jump']:.2%}")
+        c1.metric(f"VaR {conf:.0%}  (market)",     f"{cvar_res['var_no_jump']:.2%}")
+        c1.metric(f"CVaR {conf:.0%} (market)",     f"{cvar_res['cvar_no_jump']:.2%}")
+        c2.metric(f"VaR {conf:.0%}  (structural)", f"{cvar_res['var_with_jump']:.2%}")
+        c2.metric(f"CVaR {conf:.0%} (structural)", f"{cvar_res['cvar_with_jump']:.2%}")
         st.caption(
             f"Simulation: {cvar_res['n_paths']:,} paths · Student-t ν={sim_params.get('nu', 4)} · "
             f"base jump prob={sim_params.get('jump_probability', 0.00055)}"
