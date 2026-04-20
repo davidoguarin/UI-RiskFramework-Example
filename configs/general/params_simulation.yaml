@@ -22,8 +22,9 @@ confidence: 0.95
 seed: 32
 
 # --- Jump model (shared across strategies) ---
-# Base jump probability multiplier. Per protocol:
-#   jump_probability_i = jump_probability * PRS_i 
+# Per protocol line: jump_probability_i = jump_probability * PRS_i
+#   PRS_i = calculate_PRS.compute_prs. Assets: multiplier = 1.
+# Severity: jump_mean_severity_i = alloc_max_pct_i/100; loss uses lognormal(mean≈that, jump_volatility).
 jump_probability: 0.00055  # 1/(365*5) a crash every 5 years 
 # Jump loss volatility (same for all protocols).
-jump_volatility: 0.1
+jump_volatility: 0.3

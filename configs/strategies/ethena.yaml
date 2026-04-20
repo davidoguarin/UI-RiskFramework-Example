@@ -14,7 +14,7 @@ strategy:
   # Protocols included in this strategy scenario.
   protocols:
     # Protocol display name (must match the intended protocol config file mapping)
-    - name: resolv_post_exploit
+    - name: ethena
       alloc_max_pct: 100
 
 

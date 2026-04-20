@@ -1,22 +1,10 @@
 #!/usr/bin/env python3
 """
-Combined portfolio risk view for a strategy YAML.
+Combined portfolio risk view.
 
-Computes:
-  - PSR   — portfolio protocol score (calculate_PRS_V2: Σ (γ/N)·PRS_i)
-  - CRS   — portfolio counterparty aggregate (calculate_CRS: CRS_portfolio)
-  - CVaR_sum — tail simulation from run.py (sum of no-jump and with-jump CVaR)
-  - LRC_vault — optional liquidation vault coefficient (run_liquidation) when
-    strategy.liquidation.enabled is true
-
-Final risk score (default): PSR + CRS_portfolio + CVaR_sum + LRC_vault
-  (components use different units; treat as a composite index.)
-
-Usage:
-    python main_risk.py
-    python main_risk.py --strategy Leveraged_Stake.yaml
+  python main_risk.py                    # compare ALL strategies (ranked table)
+  python main_risk.py --strategy one.yaml  # detailed output for one strategy
 """
-
 from __future__ import annotations
 
 import argparse
@@ -24,147 +12,160 @@ from pathlib import Path
 
 import numpy as np
 
-BASE_DIR = Path(__file__).resolve().parent
-
-# Default strategy file (under configs/strategies/ unless you pass a path).
-
-STRATEGY_YAML_FLAG = "Leveraged_Stake.yaml"
-#STRATEGY_YAML_FLAG = "Leveraged_Stake_hedged.yaml"
-#STRATEGY_YAML_FLAG = "default_strategy.yaml"
-#STRATEGY_YAML_FLAG = "Morpho_Gauntlet_Core.yaml"
-#STRATEGY_YAML_FLAG = "Morpho_Gauntlet_PstExp.yaml"
-#STRATEGY_YAML_FLAG = "Morpho_Steakhouse.yaml"
-#STRATEGY_YAML_FLAG = "ALL.yaml"
-#STRATEGY_YAML_FLAG = "one.yaml"
+BASE_DIR      = Path(__file__).resolve().parent
+STRATEGIES_DIR = BASE_DIR / "configs" / "strategies"
 
 
-def resolve_strategy_path(arg: str) -> Path:
-    p = Path(arg)
-    if p.is_absolute():
-        return p
-    if p.parent != Path("."):
-        return BASE_DIR / p
-    return BASE_DIR / "configs" / "strategies" / p
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Aggregate PSR, CRS, CVaR_sum, and optional liquidation LRC into one score",
-    )
-    parser.add_argument(
-        "--strategy",
-        default=STRATEGY_YAML_FLAG,
-        help="Strategy YAML filename in configs/strategies/ or a relative/absolute path",
-    )
-    args = parser.parse_args()
-    strategy_path = resolve_strategy_path(args.strategy)
-
-    # Local imports keep CLI startup light and avoid import cycles.
+def _imports():
     import run as tail_run
     from calculate_CRS import DECIMALS as CRS_DECIMALS
     from calculate_CRS import (
-        compute_crs,
-        compute_crs_portfolio,
-        compute_ors,
-        compute_s_cdiv,
-        required_param as crs_required_param,
+        compute_crs, compute_crs_portfolio, compute_ors,
+        compute_s_cdiv, required_param as crs_req,
     )
-    from calculate_PRS_V2 import compute_prs, compute_psr, is_asset, load_inputs, required_param
-
+    from calculate_PRS import compute_prs, compute_psr, is_asset, load_inputs, required_param
     from run_liquidation import (
         compute_lrc_vault_from_params,
         liquidation_params_path_from_portfolio_strategy,
-        load_params as load_liquidation_params,
+        load_params as load_liq_params,
     )
+    return (tail_run, CRS_DECIMALS, compute_crs, compute_crs_portfolio, compute_ors,
+            compute_s_cdiv, crs_req, compute_prs, compute_psr, is_asset, load_inputs,
+            required_param, compute_lrc_vault_from_params,
+            liquidation_params_path_from_portfolio_strategy, load_liq_params)
 
-    params_path = BASE_DIR / "configs" / "general" / "params.yaml"
+
+def score_strategy(strategy_path: Path) -> dict:
+    (tail_run, CRS_DECIMALS, compute_crs, compute_crs_portfolio, compute_ors,
+     compute_s_cdiv, crs_req, compute_prs, compute_psr, is_asset, load_inputs,
+     required_param, compute_lrc_vault_from_params,
+     liquidation_params_path_from_portfolio_strategy, load_liq_params) = _imports()
+
+    params_path   = BASE_DIR / "configs" / "general" / "params.yaml"
     protocols_dir = BASE_DIR / "configs" / "protocols"
 
-    if not strategy_path.is_file():
-        raise FileNotFoundError(f"Strategy file not found: {strategy_path}")
+    params, protocols, _ = load_inputs(strategy_path, protocols_dir, params_path)
 
-    params, protocols, _portfolio = load_inputs(strategy_path, protocols_dir, params_path)
-
+    # PSR
     gamma = required_param(params, "gamma")
-    prs_by_name: dict[str, float] = {}
-    for name, protocol in protocols.items():
-        if is_asset(protocol):
+    prs_by_name = {}
+    for name, proto in protocols.items():
+        if is_asset(proto):
             continue
-        prs, _, _ = compute_prs(protocol, params)
+        prs, _ = compute_prs(proto, params)
         prs_by_name[name] = prs
-    psr, _psr_contrib, _n = compute_psr(prs_by_name, protocols, gamma)
+    psr, _, _ = compute_psr(prs_by_name, protocols, gamma)
 
-    delta_crs = (
-        float(params["delta_crs"])
-        if "delta_crs" in params
-        else crs_required_param(params, "delta_pcr")
-    )
-    omega_cdiv = crs_required_param(params, "omega_cdiv")
-    crs_by_name: dict[str, float] = {}
-    for name, protocol in protocols.items():
-        ors_i, _ = compute_ors(protocol, params)
-        crs_i, _, _ = compute_crs(protocol, params, ors_i)
-        s_cdiv, _ = compute_s_cdiv(protocol)
-        crs_full = round(crs_i + omega_cdiv * s_cdiv, CRS_DECIMALS)
-        crs_by_name[name] = crs_full
-    crs_portfolio, _crs_contrib = compute_crs_portfolio(crs_by_name, protocols, delta_crs)
+    # CRS
+    delta_crs  = float(params.get("delta_crs", params.get("delta_pcr", 0.5)))
+    omega_cdiv = crs_req(params, "omega_cdiv")
+    crs_by_name = {}
+    for name, proto in protocols.items():
+        ors_i, _   = compute_ors(proto, params)
+        crs_i, _, _ = compute_crs(proto, params, ors_i)
+        s_cdiv, _  = compute_s_cdiv(proto)
+        crs_by_name[name] = round(crs_i + omega_cdiv * s_cdiv, CRS_DECIMALS)
+    crs_portfolio, _ = compute_crs_portfolio(crs_by_name, protocols, delta_crs)
 
-    p_sim = tail_run.load_params(strategy_path)
+    # CVaR
+    p_sim      = tail_run.load_params(strategy_path)
     jump_model = tail_run.build_protocol_jump_model(strategy_path, p_sim["jump_probability"])
-    rng_base = np.random.default_rng(p_sim.get("seed"))
-    rng_no_jump = np.random.default_rng(rng_base.integers(0, 2**32 - 1))
-    losses_no_jump = tail_run.simulate_losses(
-        p_sim, rng_no_jump, jump_model, jump_probability_override=0.0
-    )
-    _var_no_jump, cvar_no_jump = tail_run.var_cvar(losses_no_jump, p_sim["confidence"])
-    rng_with_jump = np.random.default_rng(rng_base.integers(0, 2**32 - 1))
-    losses_with_jump = tail_run.simulate_losses(
-        p_sim, rng_with_jump, jump_model, jump_probability_override=None
-    )
-    _var_with_jump, cvar_with_jump = tail_run.var_cvar(losses_with_jump, p_sim["confidence"])
-    cvar_sum = cvar_no_jump + cvar_with_jump
+    rng_base   = np.random.default_rng(p_sim.get("seed"))
+    rng1 = np.random.default_rng(rng_base.integers(0, 2**32 - 1))
+    rng2 = np.random.default_rng(rng_base.integers(0, 2**32 - 1))
+    _, cvar_nj = tail_run.var_cvar(
+        tail_run.simulate_losses(p_sim, rng1, jump_model, jump_probability_override=0.0),
+        p_sim["confidence"])
+    _, cvar_wj = tail_run.var_cvar(
+        tail_run.simulate_losses(p_sim, rng2, jump_model),
+        p_sim["confidence"])
+    cvar_sum = cvar_nj + cvar_wj
 
-    liq_path: Path | None
+    # Liquidation
+    lrc_vault = 0.0
     try:
         liq_path = liquidation_params_path_from_portfolio_strategy(strategy_path)
-    except ValueError:
-        liq_path = None
+        liq_p    = load_liq_params(liq_path)
+        lrc_vault, _, _ = compute_lrc_vault_from_params(liq_p)
+    except (ValueError, FileNotFoundError):
+        pass
 
-    lrc_vault = 0.0
-    liq_detail = ""
-    if liq_path is not None:
-        liq_p = load_liquidation_params(liq_path)
-        lrc_vault, liq_names, liq_probs = compute_lrc_vault_from_params(liq_p)
-        try:
-            rel = liq_path.relative_to(BASE_DIR)
-        except ValueError:
-            rel = liq_path
-        parts = [f"{n}: P(Liq)={float(liq_probs[i]):.4f}" for i, n in enumerate(liq_names)]
-        liq_detail = f"{rel}  |  " + "; ".join(parts)
+    proto_lines = [
+        f"{name}  {proto.get('alloc_max_pct', '?')}%"
+        for name, proto in protocols.items()
+    ]
+    return {
+        "name":        p_sim.get("strategy_name", strategy_path.stem),
+        "file":        strategy_path.stem,
+        "n_proto":     len(protocols),
+        "proto_lines": proto_lines,
+        "psr":         psr,
+        "crs":         crs_portfolio,
+        "cvar_mkt":    cvar_nj,
+        "cvar_str":    cvar_wj,
+        "cvar_sum":    cvar_sum,
+        "lrc":         lrc_vault,
+        "total":       psr + crs_portfolio + cvar_sum + lrc_vault,
+    }
 
-    final_risk_score = psr + crs_portfolio + cvar_sum + lrc_vault
 
-    sim_name = p_sim.get("strategy_name", strategy_path.stem)
-    try:
-        strategy_display = strategy_path.relative_to(BASE_DIR)
-    except ValueError:
-        strategy_display = strategy_path
-    print("=== Combined risk (main_risk.py) ===")
-    print(f"Strategy file: {strategy_display}")
-    print(f"Simulation label: {sim_name}")
-    print()
-    print(f"  PSR (portfolio protocol score):     {psr:.6f}")
-    print(f"  CRS (portfolio, calculate_CRS):      {crs_portfolio:.6f}")
-    print(f"  CVaR_sum (run.py, no-jump + w-jump): {cvar_sum:.6f}  (fraction of NAV)")
-    if liq_path is None:
-        print("  LRC_vault (liquidation):             0.000000  (not enabled or no strategy.liquidation block)")
+def print_detail(r: dict) -> None:
+    print(f"\n=== {r['name']}  ({r['file']}.yaml) ===")
+    print(f"  Protocols ({r['n_proto']}):")
+    for line in r["proto_lines"]:
+        print(f"    • {line}")
+    print(f"  PSR                   : {r['psr']:.6f}")
+    print(f"  CRS                   : {r['crs']:.6f}")
+    print(f"  CVaR market           : {r['cvar_mkt']:.2%}")
+    print(f"  CVaR structural       : {r['cvar_str']:.2%}")
+    print(f"  CVaR sum              : {r['cvar_sum']:.2%}")
+    print(f"  LRC vault             : {r['lrc']:.6f}")
+    print(f"  ─────────────────────────────────")
+    print(f"  Final risk score      : {r['total']:.6f}")
+
+
+def print_table(rows: list[dict]) -> None:
+    rows = sorted(rows, key=lambda x: x["total"])
+    hdr = f"{'Strategy':<28} {'#':<3} {'PSR':>7} {'CRS':>7} {'CVaR mkt':>9} {'CVaR str':>9} {'CVaR sum':>9} {'LRC':>7} {'TOTAL':>9}"
+    sep = "─" * len(hdr)
+    print("\n=== Strategy comparison (sorted by total risk) ===\n")
+    print(hdr)
+    print(sep)
+    for r in rows:
+        print(
+            f"{r['name']:<28} {r['n_proto']:<3} "
+            f"{r['psr']:>7.4f} {r['crs']:>7.4f} "
+            f"{r['cvar_mkt']:>9.2%} {r['cvar_str']:>9.2%} {r['cvar_sum']:>9.2%} "
+            f"{r['lrc']:>7.4f} {r['total']:>9.4f}"
+        )
+    print(sep)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--strategy", default=None,
+        help="Single strategy YAML to score in detail (omit to compare all)",
+    )
+    args = parser.parse_args()
+
+    if args.strategy:
+        p = Path(args.strategy)
+        if not p.is_absolute() and p.parent == Path("."):
+            p = STRATEGIES_DIR / p
+        if not p.is_file():
+            raise FileNotFoundError(p)
+        print_detail(score_strategy(p))
     else:
-        print(f"  LRC_vault (liquidation):             {lrc_vault:.6f}")
-        print(f"       {liq_detail}")
-    print()
-    print(f"  Final risk score (sum):              {final_risk_score:.6f}")
-    print()
-    print("  Components: PSR + CRS + CVaR_sum + LRC_vault (liquidation term 0 if disabled).")
+        yamls = sorted(STRATEGIES_DIR.glob("*.yaml"))
+        rows  = []
+        for y in yamls:
+            print(f"Scoring {y.stem}…", flush=True)
+            try:
+                rows.append(score_strategy(y))
+            except Exception as e:
+                print(f"  ⚠ skipped: {e}")
+        print_table(rows)
 
 
 if __name__ == "__main__":

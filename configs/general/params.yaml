@@ -19,7 +19,7 @@ parameters:
   # beta (β): weight on Σ θ_i in PCR_vault
   beta: 10
   # gamma (γ): scales average protocol risk (γ/N)*Σ PRS_i in PCR_vault
-  gamma: 0.2
+  gamma: 0.3
   # delta_crs (δ_crs): weight on (1/N)*Σ CRS_i in CRS_portfolio
   delta_crs: 0.5
   # omega_pds (ω_pds): weight on allocation concentration w_i^2 inside each CRS_i (Σ w_i^2 = PDS)
@@ -29,6 +29,8 @@ parameters:
   phi: 1.0
   # ν (nu): weight on S_MS inside PRS_i
   nu: 1.0
+  # delta_critical: added to PRS_i when protocol YAML Delta_Critical > 0 (critical depeg/freeze/governance window)
+  delta_critical: 4
   w_u: 1.0   # U: contract_changes (upgrades)
   w_f: 1.0   # F: funds_movement
   w_p: 1.0   # P: parameter_changes

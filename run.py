@@ -34,7 +34,6 @@ DEFAULT_SHARED_SIM_PATH = BASE_DIR / "configs" / "general" / "params_simulation.
 #STRATEGY_YAML_FLAG = "Morpho_Gauntlet_PstExp.yaml"
 STRATEGY_YAML_FLAG = "Morpho_Steakhouse.yaml"
 #STRATEGY_YAML_FLAG = "ALL.yaml"
-#STRATEGY_YAML_FLAG = "one.yaml"
 
 def load_yaml(path):
     with open(path, encoding="utf-8") as f:
@@ -163,10 +162,16 @@ def simulate_losses(p, rng, protocol_jump_model, jump_probability_override=None)
 
 
 def var_cvar(losses, confidence):
-    """VaR = quantile at confidence; CVaR = mean of losses >= VaR."""
+    """VaR = quantile at confidence; CVaR = conditional expected loss in the tail.
+    When VaR=0 (most paths have zero loss due to positive drift), fall back to
+    E[loss | loss > 0] so concentrated portfolios are not artificially diluted."""
     var = np.quantile(losses, confidence)
-    tail = losses[losses >= var]
-    cvar = float(np.mean(tail)) if len(tail) > 0 else var
+    if var <= 0.0:
+        pos = losses[losses > 0.0]
+        cvar = float(np.mean(pos)) if len(pos) > 0 else 0.0
+    else:
+        tail = losses[losses >= var]
+        cvar = float(np.mean(tail)) if len(tail) > 0 else var
     return float(var), cvar
 
 

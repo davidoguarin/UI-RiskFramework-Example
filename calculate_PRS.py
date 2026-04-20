@@ -7,9 +7,10 @@ Definitions (N = number of line items in the strategy, including assets):
   PRS_i = mu*S_Maturity,i + S_sigmaTVL,i + S_NAudits,i + zeta*S_TAudit,i + S_CE,i + nu*S_MS,i + Delta_Critical,i
         (only for category protocol; assets are skipped)
 
-  PSR   = Σ_{i not asset} (gamma / N) * PRS_i
+  PSR   = Σ_{i not asset} gamma * w_i * PRS_i
+  w_i   = alloc_max_pct_i / (Σ_j alloc_max_pct_j)  over all strategy lines (allocation share)
 
-Assets (category: asset, e.g. cbBTC) are not scored and add 0 to PSR, but they are counted in N.
+Assets (category: asset, e.g. cbBTC) are not scored (PRS_i omitted); they still shape weights w via their alloc_max_pct.
 """
 
 from __future__ import annotations
@@ -202,6 +203,11 @@ def compute_prs(protocol: dict, params: dict) -> Tuple[float, Dict[str, float]]:
     s_t_audit_raw = s_t_audit(float(protocol["months_since_audit"]), t_max_months)
     s_ms, _ = compute_sms(protocol, params)
 
+    dc_flag = float(protocol.get("Delta_Critical", 0.0))
+    delta_critical_term = (
+        round(required_param(params, "delta_critical"), DECIMALS) if dc_flag > 0.0 else 0.0
+    )
+
     components = {
         "S_Maturity": round(s_maturity_raw * mu, DECIMALS),
         "S_sigmaTVL": s_sigma_tvl(float(protocol["tvl_vol_pct"]), eta),
@@ -209,7 +215,7 @@ def compute_prs(protocol: dict, params: dict) -> Tuple[float, Dict[str, float]]:
         "S_TAudit": round(zeta * s_t_audit_raw, DECIMALS),
         "S_CE": s_ce(int(protocol["n_critical_exploits"]), kappa),
         "S_MS": round(nu * s_ms, DECIMALS),
-        "Delta_Critical": round(float(protocol.get("Delta_Critical", 0.0)), DECIMALS),
+        "Delta_Critical": delta_critical_term,
     }
     prs = round(sum(components.values()), DECIMALS)
     return prs, components
@@ -219,14 +225,18 @@ def compute_psr(prs_by_name: Dict[str, float], protocols: Dict, gamma: float) ->
     n = len(protocols)
     if n <= 0:
         raise ValueError("protocols must be non-empty")
-    gon = float(gamma) / n
+    total_alloc = sum(float(p.get("alloc_max_pct", 0.0)) for p in protocols.values())
+    if total_alloc <= 0:
+        raise ValueError("Sum of alloc_max_pct across strategy lines must be positive")
+    gamma_f = float(gamma)
     contrib: Dict[str, float] = {}
     s = 0.0
     for name, protocol in protocols.items():
         if is_asset(protocol):
             contrib[name] = 0.0
             continue
-        c = round(gon * float(prs_by_name.get(name, 0.0)), DECIMALS)
+        w_i = float(protocol.get("alloc_max_pct", 0.0)) / total_alloc
+        c = round(gamma_f * w_i * float(prs_by_name.get(name, 0.0)), DECIMALS)
         contrib[name] = c
         s += c
     return round(s, DECIMALS), contrib, n
@@ -257,7 +267,7 @@ def main() -> None:
         print(f"\n{name}")
         print("-" * 32)
         if is_asset(protocol):
-            print("  category: asset — no PRS; excluded from PSR sum; counted in N")
+            print("  category: asset — no PRS; alloc_max_pct still affects peer allocation weights w_i")
             continue
         prs, components = compute_prs(protocol, params)
         prs_by_name[name] = prs
@@ -269,8 +279,8 @@ def main() -> None:
     print("\nPSR (portfolio protocol score)")
     print("=" * 50)
     print(
-        f"  PSR = Σ (gamma/N) * PRS_i over protocol lines only; "
-        f"N = {n_proto} (includes assets). gamma = {gamma}"
+        f"  PSR = Σ γ * w_i * PRS_i with w_i = alloc_max_pct_i / (Σ alloc_max_pct); "
+        f"lines = {n_proto}. γ = {gamma}"
     )
     for name, c in psr_contrib.items():
         print(f"    {name}: {c:.{DECIMALS}f}")
