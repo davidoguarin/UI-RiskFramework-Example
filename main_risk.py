@@ -138,6 +138,7 @@ def print_table(rows: list[dict]) -> None:
             f"{r['cvar_mkt']:>9.2%} {r['cvar_str']:>9.2%} {r['cvar_sum']:>9.2%} "
             f"{r['lrc']:>7.4f} {r['total']:>9.4f}"
         )
+        print(f"  └─ {', '.join(r['proto_lines'])}")
     print(sep)
 
 
