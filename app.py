@@ -604,12 +604,16 @@ def _show_strategy_results(
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
+LOGO_PATH = BASE / "assets" / "p2p_logo.png"
+
 def main() -> None:
     st.set_page_config(
         page_title="Risk Analysis Framework",
         page_icon="🛡️",
         layout="wide",
     )
+    if LOGO_PATH.exists():
+        st.logo(str(LOGO_PATH))
     if "selected_protocol" not in st.session_state:
         st.session_state.selected_protocol = None
 
