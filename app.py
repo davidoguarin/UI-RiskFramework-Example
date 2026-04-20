@@ -614,8 +614,6 @@ def main() -> None:
         page_icon=_icon,
         layout="wide",
     )
-    if LOGO_PATH.exists():
-        st.logo(str(LOGO_PATH))
     if "selected_protocol" not in st.session_state:
         st.session_state.selected_protocol = None
 
@@ -626,7 +624,12 @@ def main() -> None:
         show_protocol_detail(st.session_state.selected_protocol, all_protocols, params)
         return
 
-    st.title("Risk Analysis Framework")
+    col_logo, col_title = st.columns([1, 8])
+    with col_logo:
+        if LOGO_PATH.exists():
+            st.image(str(LOGO_PATH), width=80)
+    with col_title:
+        st.title("Risk Analysis Framework")
 
     st.header("Protocol Risk")
     st.markdown(
