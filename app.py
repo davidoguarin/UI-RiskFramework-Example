@@ -135,6 +135,7 @@ def cached_top_usde_pools() -> pd.DataFrame:
 def run_strategy_cvar(
     protocol_stems: tuple[str, ...],
     alloc_values: tuple[float, ...],
+    volatility_annual: float = 0.30,
 ) -> dict:
     """Monte Carlo CVaR for the given strategy (protocol stems + allocations %)."""
     sim = load_sim_params()
@@ -146,7 +147,7 @@ def run_strategy_cvar(
         "n_paths":           n_paths,
         "step_days":         int(sim.get("step_days", 1)),
         "horizon_days":      int(sim.get("horizon_days", 30)),
-        "volatility_annual": float(sim.get("volatility_annual", 0.30)),
+        "volatility_annual": float(volatility_annual),
         "apy_min":           float(sim.get("apy_min", 0.05)),
         "apy_max":           float(sim.get("apy_max", 0.15)),
         "nu":                float(sim.get("nu", 4.0)),
@@ -159,7 +160,7 @@ def run_strategy_cvar(
     for stem, alloc in zip(protocol_stems, alloc_values):
         proto = all_protocols.get(stem, {})
         if is_asset(proto):
-            mult = float(proto.get("monthly_volatility", 0.04))
+            mult = 1.0  # jump probability not scaled by asset volatility
         else:
             mult, _ = compute_prs(proto, params)
         weight = max(0.0, alloc / 100.0)
@@ -436,16 +437,15 @@ def show_protocol_detail(stem: str, all_protocols: dict, params: dict) -> None:
 
 def show_protocol_grid(all_protocols: dict) -> None:
     COLS  = 4
-    stems = list(all_protocols.keys())
+    stems = [s for s, p in all_protocols.items() if not is_asset(p)]
+    stems = sorted(stems, key=lambda s: (0 if s == "ethena" else 1, s))
     rows  = [stems[i : i + COLS] for i in range(0, len(stems), COLS)]
     for row in rows:
         cols = st.columns(COLS)
         for col, stem in zip(cols, row):
-            proto = all_protocols[stem]
             label = DISPLAY_NAMES.get(stem, stem.replace("_", " ").title())
-            icon  = "📦" if is_asset(proto) else "🔷"
             with col:
-                if st.button(f"{icon} {label}", key=f"btn_{stem}", use_container_width=True):
+                if st.button(f"🔷 {label}", key=f"btn_{stem}", use_container_width=True):
                     st.session_state.selected_protocol = stem
                     st.rerun()
 
@@ -454,7 +454,7 @@ def show_vault_strategy_section(all_protocols: dict, params: dict) -> None:
     st.markdown("---")
     st.header("Vault Strategy Risk Score")
     st.markdown(
-        "Use this secondary tool to assess the risk of a diversified investment strategy or a specific vault. "
+        "Use this dedicated tool to assess the risk of a diversified investment strategy or a specific vault. "
         "To begin, select the protocols involved from the list and assign an approximate maximum percentage allocation to each."
     )
 
@@ -487,8 +487,15 @@ def show_vault_strategy_section(all_protocols: dict, params: dict) -> None:
             help="Staked looping (involves liquidation risk) is disabled in this version.",
         )
 
+        volatility_pct = st.slider(
+            "Portfolio volatility — year-average of monthly realized vol from daily TVL (%)",
+            min_value=1, max_value=100, value=30, step=1,
+            help="Used as the annualized volatility input for the CVaR Monte Carlo simulation.",
+        )
+
         if st.button("Calculate Risk Score", type="primary"):
-            _show_strategy_results(selected, allocations, all_protocols, params)
+            _show_strategy_results(selected, allocations, all_protocols, params,
+                                   volatility_annual=volatility_pct / 100.0)
 
 
 def _show_strategy_results(
@@ -496,6 +503,7 @@ def _show_strategy_results(
     allocations: dict[str, float],
     all_protocols: dict,
     params: dict,
+    volatility_annual: float = 0.30,
 ) -> None:
     sim_params = load_sim_params()
 
@@ -519,7 +527,7 @@ def _show_strategy_results(
     with st.spinner(f"Running CVaR simulation ({min(int(sim_params.get('n_paths', 10000)), 10000):,} paths)…"):
         stems_tuple  = tuple(selected)
         allocs_tuple = tuple(allocations.get(s, 0) for s in selected)
-        cvar_res = run_strategy_cvar(stems_tuple, allocs_tuple)
+        cvar_res = run_strategy_cvar(stems_tuple, allocs_tuple, volatility_annual)
 
     conf    = cvar_res["confidence"]
     horizon = cvar_res["horizon_days"]
