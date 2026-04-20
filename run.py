@@ -7,6 +7,14 @@ Architecture:
   configs/general/params_simulation.yaml  →  shared simulation parameters
   configs/strategies/<strategy>.yaml      →  strategy.simulation parameters
   run.py       →  load params, simulate NAV paths (Student-t + jump), compute VaR/CVaR, print
+
+  Per protocol line i (not asset): jump_probability_i = jump_probability × PRS_i
+  (PRS_i from calculate_PRS.compute_prs.)
+
+  Jump model in simulation:
+    - Jumps are evaluated per protocol line each day.
+    - Each line uses its own jump_probability_i and jump_mean_severity_i.
+    - Per-step portfolio jump loss is the sum across protocol lines.
 """
 
 import argparse
@@ -20,11 +28,11 @@ BASE_DIR = Path(__file__).parent
 DEFAULT_SHARED_SIM_PATH = BASE_DIR / "configs" / "general" / "params_simulation.yaml"
 #STRATEGY_YAML_FLAG = "Morpho_Gauntlet_PstExp.yaml"
 #STRATEGY_YAML_FLAG = "default_strategy.yaml"
-STRATEGY_YAML_FLAG = "Leveraged_Stake.yaml"
+#STRATEGY_YAML_FLAG = "Leveraged_Stake.yaml"
 #STRATEGY_YAML_FLAG = "Leveraged_Stake_hedged.yaml"
 #STRATEGY_YAML_FLAG = "Morpho_Gauntlet_Core.yaml"
 #STRATEGY_YAML_FLAG = "Morpho_Gauntlet_PstExp.yaml"
-#STRATEGY_YAML_FLAG = "Morpho_Steakhouse.yaml"
+STRATEGY_YAML_FLAG = "Morpho_Steakhouse.yaml"
 #STRATEGY_YAML_FLAG = "ALL.yaml"
 #STRATEGY_YAML_FLAG = "one.yaml"
 
@@ -66,6 +74,13 @@ def load_params(strategy_path, shared_path=DEFAULT_SHARED_SIM_PATH):
 
 
 def build_protocol_jump_model(strategy_path, base_jump_probability):
+    """
+    Build per-line jump_probability_i and jump_mean_severity_i for simulate_losses.
+
+    - jump_probability_i = base × PRS_i (protocols) or base × 1 (assets).
+    - jump_mean_severity_i = f(PRS_i), where f(x) = x/(1+x), bounded in (0,1).
+      Allocation is applied once through `weight`, avoiding double scaling by alloc.
+    """
     params_path = BASE_DIR / "configs" / "general" / "params.yaml"
     protocols_dir = BASE_DIR / "configs" / "protocols"
     prs_params, protocols, _ = load_prs_inputs(strategy_path, protocols_dir, params_path)
@@ -74,16 +89,20 @@ def build_protocol_jump_model(strategy_path, base_jump_probability):
     for name, protocol in protocols.items():
         category = str(protocol.get("category", "protocol")).strip().lower()
         if category == "asset":
-            multiplier = float(protocol["monthly_volatility"])
-            multiplier_source = "monthly_volatility"
+            # Jump probability uses base rate × 1; do not scale by asset monthly_volatility.
+            multiplier = 1.0
+            multiplier_source = "1 (asset)"
         else:
-            multiplier, _ = compute_prs(protocol, prs_params)
+            prs_i, _ = compute_prs(protocol, prs_params)
+            multiplier = prs_i
             multiplier_source = "PRS_i"
 
         alloc_pct = float(protocol.get("alloc_max_pct", 0.0))
         weight = max(0.0, alloc_pct / 100.0)
+        # Probability scales with PRS; severity is always 100% of the protocol's value.
+        # Portfolio impact = weight_i × 1.0, so concentration (large weight) drives tail risk.
         jump_probability_i = float(np.clip(base_jump_probability * multiplier, 0.0, 1.0))
-        jump_mean_severity_i = float(np.clip(weight, 0.0, 1.0))
+        jump_mean_severity_i = 1.0
         jump_model.append(
             {
                 "name": name,
@@ -108,7 +127,10 @@ def student_t_return(rng, vol, nu, drift, dt, n):
 
 
 def jump_loss(rng, prob, mean_sev, sev_vol, n):
-    """Jump loss per path: 0 w.p. (1-p), else lognormal(mean_sev, sev_vol)."""
+    """
+    Jump loss fraction in [0, 1]: Bernoulli(p) then LogNormal with mean ≈ mean_sev
+    and scale tied to sev_vol (see `jump_volatility` in params). Returns 0 when no jump.
+    """
     u = rng.random(n)
     jump = u < prob
     tiny = 1e-12
@@ -200,14 +222,22 @@ if __name__ == "__main__":
             f"  {cfg['name']:<18}  {cfg['category']:<8}  {cfg['multiplier']:<7.4f} ({cfg['multiplier_source']:<17})  "
             f"{cfg['jump_probability']:<12.6f}  {cfg['jump_mean_severity']:<.4f}"
         )
+    n_asset_lines = sum(1 for cfg in protocol_jump_model if cfg["category"] == "asset")
+    if n_asset_lines == 0:
+        print()
+        print(
+            "Note: This strategy has no asset lines (category: asset). Every jump multiplier is PRS_i, "
+            "so results match the pre-change behavior for protocol-only portfolios. "
+            "The no-volatility scaling applies only to assets (e.g. WBTC/cbBTC in Morpho_Steakhouse.yaml)."
+        )
     print()
     print(f"[No jumps: jump_probability=0]")
     print(f"VaR{p['confidence']:.0%}:  {var_no_jump:.2%} of NAV")
     print(f"CVaR{p['confidence']:.0%} (Tail Risk Severity): {cvar_no_jump:.2%} of NAV")
     print()
     print(
-        f"[With protocol-level jumps: jump_probability_i = {p['jump_probability']} * "
-        "multiplier (PRS_i for protocols, monthly_volatility for assets)]"
+        f"[With protocol-level jumps: jump_probability_i = {p['jump_probability']} * PRS_i "
+        "(calculate_PRS per line; assets use multiplier 1)]"
     )
     print(f"VaR{p['confidence']:.0%}:  {var_with_jump:.2%} of NAV")
     print(f"CVaR{p['confidence']:.0%} (Tail Risk Severity): {cvar_with_jump:.2%} of NAV")
