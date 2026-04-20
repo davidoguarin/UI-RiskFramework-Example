@@ -8,6 +8,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from PIL import Image
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -607,9 +608,10 @@ def _show_strategy_results(
 LOGO_PATH = BASE / "assets" / "p2p_logo.png"
 
 def main() -> None:
+    _icon = Image.open(LOGO_PATH) if LOGO_PATH.exists() else "🛡️"
     st.set_page_config(
         page_title="Risk Analysis Framework",
-        page_icon="🛡️",
+        page_icon=_icon,
         layout="wide",
     )
     if LOGO_PATH.exists():
@@ -624,7 +626,7 @@ def main() -> None:
         show_protocol_detail(st.session_state.selected_protocol, all_protocols, params)
         return
 
-    st.title("🛡️ Risk Analysis Framework")
+    st.title("Risk Analysis Framework")
 
     st.header("Protocol Risk")
     st.markdown(
