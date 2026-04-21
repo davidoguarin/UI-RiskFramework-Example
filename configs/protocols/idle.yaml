@@ -43,3 +43,5 @@ multisig_requirements:  # Idle Labs & other guardian Safes: https://docs.idle.fi
   parameter_changes: "unknown"  # same
   # Guardian multisig can pause `mintIdleToken` — Idle Labs listed as 2/4 for senior BY — security-management-policy.md (same URL)
   minting: "2/4"
+
+n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging

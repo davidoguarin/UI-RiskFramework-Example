@@ -46,3 +46,5 @@ multisig_requirements:  # 2/4 Safe referenced e.g. https://forum.arbitrum.founda
   parameter_changes: "2/4"  # same caveat
   # PT/YT mint mechanics: https://docs.pendle.finance/pendle-v2/ProtocolMechanics/YieldTokenization/Minting (user-driven; multisig is ops/governance-adjacent)
   minting: "2/4"
+
+n_dvn: null  # Uses LayerZero OFT — DVN config not publicly documented; verify on-chain via getConfig()

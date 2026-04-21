@@ -47,3 +47,5 @@ multisig_requirements:  # Pause/upgrade / DAO multisig roles: https://docs.euler
   parameter_changes: "unknown"  # risk steward / emergency roles per same doc hub
   # Vault share tokens minted on supply; privileged roles are timelock/governance — not a single “mint multisig” in docs.
   minting: "unknown"
+
+n_dvn: null  # Uses LayerZero OFT — DVN config not publicly documented; verify on-chain via getConfig()

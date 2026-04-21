@@ -42,3 +42,5 @@ multisig_requirements:  # Protocol overview / roles: https://devdocs.silo.financ
   parameter_changes: "unknown"
   # Vault share tokens on deposit/borrow; no public Safe m/n for “mint” surfaced in developer overview above.
   minting: "unknown"
+
+n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging

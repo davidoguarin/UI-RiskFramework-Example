@@ -33,3 +33,5 @@ multisig_requirements:  # many committee Safes with different quorums — https:
   parameter_changes: "5/7"  # repo comment — verify intended committee
   # stETH is minted/burned by protocol on stake/unstake; not an m/n multisig “mint approval” per deposit — https://docs.lido.fi/
   minting: "N/A"
+
+n_dvn: 2  # Polyhedra zkLightClient + Nethermind DVN (source: Lido governance forum, MIP for wstETH OFT)

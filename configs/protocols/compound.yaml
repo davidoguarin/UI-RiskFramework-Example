@@ -28,3 +28,5 @@ multisig_requirements:  # Pause Guardian / Community Multi-Sig: https://compound
   parameter_changes: "4/8"  # borrow caps etc. may route via Timelock/governance — same doc
   # cToken mint is end-user supply; Pause Guardian can disable Mint among other actions — governance doc § Pause Guardian.
   minting: "unknown"
+
+n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging

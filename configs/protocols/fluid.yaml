@@ -25,3 +25,5 @@ multisig_requirements:  # Fluid launch / governance: https://gov.fluid.io/t/flui
   parameter_changes: "unknown"  # Guardian can pause (cannot move funds per launch proposal text) — verify roles on-chain
   # fToken supply increases on user deposit; new fToken deployment was “team multisig as deployer” at launch — no public m/n here.
   minting: "unknown"
+
+n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging

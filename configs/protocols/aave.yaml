@@ -28,3 +28,5 @@ multisig_requirements:  # AAVE token page documents AFC = 3-of-4 multisig for bu
   parameter_changes: "5/9"  # same — Aave governance docs + forum
   # GHO: facilitators & bucket roles are governance-controlled — https://aave.com/docs/ecosystem/gho (not a single fixed Safe m/n).
   minting: "unknown"
+
+n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging

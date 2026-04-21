@@ -35,3 +35,5 @@ multisig_requirements:  # Morpho org page (Apr 2026): https://docs.morpho.org/le
   parameter_changes: "5/9"  # fee switch, LLTV/IRM whitelist, etc. — implemented via governance multisig — same page
   # No collateral-backed stablecoin “mint”; interest-bearing positions are not Ethena-style minted supply.
   minting: "N/A"
+
+n_dvn: 2  # LayerZero Labs DVN + Canary DVN (source: MIP-113 governance forum, Aug 2025)

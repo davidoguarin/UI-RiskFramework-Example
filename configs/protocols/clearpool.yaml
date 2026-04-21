@@ -37,3 +37,5 @@ multisig_requirements:  # Tokenomics (treasury/team multisig cold storage): http
   parameter_changes: "unknown"  # oracle/IRM voting per governance pages — same docs hub
   # Pool LP token minting from liquidity supply; no published mint-controller multisig threshold in official docs reviewed.
   minting: "unknown"
+
+n_dvn: null  # Uses LayerZero OFT — DVN config not publicly documented; verify on-chain via getConfig()

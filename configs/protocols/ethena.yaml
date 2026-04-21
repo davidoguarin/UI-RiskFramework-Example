@@ -63,3 +63,5 @@ multisig_requirements:
   # EthenaMinting ADMIN multisig (same governance family); executing mint calls use MINTER EOAs — roles table:
   # https://docs.ethena.fi/solution-design/minting-usde/mint-and-redeem-key-functions
   minting: "7/10"
+
+n_dvn: 2  # LayerZero Labs DVN + Horizen DVN (source: Sandman Substack security analysis, Apr 2026)

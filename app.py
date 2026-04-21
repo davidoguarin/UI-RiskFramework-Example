@@ -25,6 +25,7 @@ from calculate_CRS import (
     compute_crs_portfolio,
     compute_ors,
     compute_s_cdiv,
+    compute_s_dvn,
 )
 from calculate_PRS import (
     compute_prs,
@@ -82,6 +83,7 @@ CRS_META: dict[str, str] = {
     "S_ODiv×χ":  "Oracle Diversity (chi×S_ODiv)",
     "Validator": "Validator Risk (scaled)",
     "S_CDiv×ω":  "Counterparty Div. (omega×S_CDiv)",
+    "DVN×λ":     "DVN Risk (lambda×S_DVN) — 0 if not cross-chain",
 }
 
 # ── Colour helpers ────────────────────────────────────────────────────────────
@@ -211,6 +213,7 @@ def compute_all_scores(protocols: dict, params: dict) -> tuple[dict, dict, dict,
         cdiv_term  = round(omega_cdiv * s_cdiv_i, 4)
         chi = detail.get("chi", 1.0)
         sodiv = detail.get("S_ODiv", 0.0)
+        dvn_term, _ = compute_s_dvn(proto, params)
         crs_comps[name] = {
             "S_OH":      ors_comp.get("S_OH", 0),
             "S_OD":      ors_comp.get("S_OD", 0),
@@ -218,10 +221,11 @@ def compute_all_scores(protocols: dict, params: dict) -> tuple[dict, dict, dict,
             "S_ODiv×χ":  round(chi * sodiv, 4),
             "Validator": detail.get("validator_term", 0),
             "S_CDiv×ω":  cdiv_term,
-            "CRS":       round(crs_i + cdiv_term, 4),
+            "DVN×λ":     dvn_term,
+            "CRS":       round(crs_i + cdiv_term + dvn_term, 4),
             "_cdiv_details": cdiv_d,
         }
-        crs_by_name[name] = round(crs_i + cdiv_term, 4)
+        crs_by_name[name] = round(crs_i + cdiv_term + dvn_term, 4)
 
     return prs_by_name, prs_comps, crs_by_name, crs_comps
 
@@ -394,7 +398,8 @@ def show_protocol_detail(stem: str, all_protocols: dict, params: dict) -> None:
     cdiv_term        = round(omega_cdiv * s_cdiv_i, 4)
     chi              = detail.get("chi", 1.0)
     sodiv            = detail.get("S_ODiv", 0.0)
-    crs_full         = round(crs_i + cdiv_term, 4)
+    dvn_term, _ = compute_s_dvn(proto, params)
+    crs_full         = round(crs_i + cdiv_term + dvn_term, 4)
 
     crs_comp_display = {
         "S_OH":      ors_comp.get("S_OH", 0),
@@ -403,6 +408,7 @@ def show_protocol_detail(stem: str, all_protocols: dict, params: dict) -> None:
         "S_ODiv×χ":  round(chi * sodiv, 4),
         "Validator": detail.get("validator_term", 0),
         "S_CDiv×ω":  cdiv_term,
+        "DVN×λ":     dvn_term,
     }
 
     col_prs, col_crs = st.columns(2)

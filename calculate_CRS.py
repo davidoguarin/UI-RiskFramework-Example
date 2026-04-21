@@ -13,10 +13,14 @@ Per-protocol equations:
   S_CDiv,i      = Σ_j w²_div * Q_j   (equal weights w_div = 1/n_counterparties)
                   Q_j from COUNTERPARTY_QUALITY_SCORES; 0 if no counterparty_protocols defined
                   Self-references and oracle/validator dependencies excluded (tracked elsewhere)
+  S_DVN,i       = exp(-phi_dvn * max(0, n_dvn_i - 1))
+                  n_dvn_i from protocol YAML field n_dvn (null → 0 contribution, not applicable)
+                  More required DVNs → lower score → lower cross-chain verification risk
   CRS_i         = ORS_i + chi * S_ODiv,i + delta_val,i * (S_VDec,i + S_VOps,i)
-                    + omega_cdiv * S_CDiv,i
+                    + omega_cdiv * S_CDiv,i + lambda_dvn * S_DVN,i
                     delta_val,i = iota if has_slashing_insurance else 1.0  (iota from params.yaml)
                     validator terms = 0 if protocol has no validator_services
+                    lambda_dvn * S_DVN,i = 0 when n_dvn is null (no cross-chain messaging)
 """
 
 from __future__ import annotations
@@ -192,26 +196,31 @@ def compute_crs(protocol: dict, params: dict, ors_i: float) -> Tuple[float, floa
     psi = required_param(params, "psi_oracle_div")
     vdec, vops, discount, val_details = compute_s_validator(protocol, params)
     validator_term = round(discount * (vdec + vops), DECIMALS)
+    dvn_term, n_dvn = compute_s_dvn(protocol, params)
     if is_asset(protocol):
-        crs = round(ors_i + validator_term, DECIMALS)
+        crs = round(ors_i + validator_term + dvn_term, DECIMALS)
         detail = {
             "n_oracle_providers": 0,
             "S_ODiv": 0.0,
             "chi": chi,
             "psi_oracle_div": psi,
             "validator_term": validator_term,
+            "dvn_term": dvn_term,
+            "n_dvn": n_dvn,
             **{f"val_{k}": v for k, v in val_details.items()},
         }
         return crs, 0.0, detail
     n = _n_oracle_providers(protocol)
     sodiv = s_odiv(n, psi)
-    crs = round(ors_i + chi * sodiv + validator_term, DECIMALS)
+    crs = round(ors_i + chi * sodiv + validator_term + dvn_term, DECIMALS)
     detail = {
         "n_oracle_providers": n,
         "S_ODiv": sodiv,
         "chi": chi,
         "psi_oracle_div": psi,
         "validator_term": validator_term,
+        "dvn_term": dvn_term,
+        "n_dvn": n_dvn,
         **{f"val_{k}": v for k, v in val_details.items()},
     }
     return crs, sodiv, detail
@@ -239,6 +248,25 @@ def compute_allocation_weights(protocols: Dict) -> Tuple[Dict[str, float], float
     weights = {name: (alloc / total_alloc) for name, alloc in alloc_values.items()}
     pds = sum(w * w for w in weights.values())
     return {k: round(v, DECIMALS) for k, v in weights.items()}, round(pds, DECIMALS)
+
+
+def s_dvn(n_dvn: int, phi_dvn: float) -> float:
+    """DVN risk: exp(-phi_dvn * max(0, n-1)). More required DVNs → lower risk."""
+    return round(math.exp(-phi_dvn * max(0, int(n_dvn) - 1)), DECIMALS)
+
+
+def compute_s_dvn(protocol: dict, params: dict) -> Tuple[float, int]:
+    """
+    Returns (lambda_dvn * S_DVN, n_dvn).
+    When n_dvn is null/absent: returns (0.0, None) — not applicable.
+    """
+    n_dvn = protocol.get("n_dvn")
+    if n_dvn is None:
+        return 0.0, None
+    phi_dvn = required_param(params, "phi_dvn")
+    lambda_dvn = required_param(params, "lambda_dvn")
+    score = s_dvn(int(n_dvn), phi_dvn)
+    return round(lambda_dvn * score, DECIMALS), int(n_dvn)
 
 
 def compute_s_cdiv(protocol: dict) -> Tuple[float, list]:
@@ -325,7 +353,13 @@ def main() -> None:
         else:
             print(f"  S_CDiv: 0.0000  (no counterparty protocols)")
         print(f"  omega_cdiv * S_CDiv: {cdiv_term:.{DECIMALS}f}")
-        print(f"  CRS_i (incl. S_CDiv term): {crs_i_full:.{DECIMALS}f}")
+        dvn_term_i = detail.get("dvn_term", 0.0)
+        n_dvn_i = detail.get("n_dvn")
+        if n_dvn_i is not None:
+            print(f"  n_dvn: {n_dvn_i}  lambda_dvn * S_DVN: {dvn_term_i:.{DECIMALS}f}")
+        else:
+            print(f"  n_dvn: null  (no cross-chain DVN messaging)")
+        print(f"  CRS_i (incl. S_CDiv + DVN terms): {crs_i_full:.{DECIMALS}f}")
 
     crs_port, crs_contrib = compute_crs_portfolio(crs_by_name, protocols, delta_crs)
 

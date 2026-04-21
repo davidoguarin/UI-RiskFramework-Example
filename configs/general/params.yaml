@@ -50,3 +50,7 @@ parameters:
   tau_v: 0.5
   # iota (ι): multiplier on (S_VDec + S_VOps) when validator_services.has_slashing_insurance is true; else 1.0
   iota: 0.8
+  # phi_dvn (φ_dvn): DVN sensitivity: S_DVN = exp(-phi_dvn * max(0, n_dvn - 1))
+  phi_dvn: 0.5
+  # lambda_dvn (λ_dvn): weight of DVN term in CRS_i; 0 when n_dvn is null (not applicable)
+  lambda_dvn: 0.3

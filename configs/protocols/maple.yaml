@@ -43,3 +43,5 @@ multisig_requirements:  # Emergency pause (multisig) + governance: https://maple
   parameter_changes: "4/7"  # same
   # syrUP / pool shares minted from deposits; pause path documented — https://docs.maple.finance/technical-resources/security/emergency-protocol-pause (no m/n in page body)
   minting: "unknown"
+
+n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging

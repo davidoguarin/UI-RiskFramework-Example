@@ -5,3 +5,5 @@ monthly_volatility: 0.04
 Delta_Critical: 0  # No BTC wrapper depeg <0.9 or qualifying freeze/governance attack in last month
 validator_services: null  # WBTC is an asset wrapper; no validator operations
 counterparty_protocols: null  # Asset; S_CDiv not applicable
+
+n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging
