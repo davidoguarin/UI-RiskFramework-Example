@@ -6,4 +6,4 @@ Delta_Critical: 0  # No BTC wrapper depeg <0.9 or qualifying freeze/governance a
 validator_services: null  # WBTC is an asset wrapper; no validator operations
 counterparty_protocols: null  # Asset; S_CDiv not applicable
 
-n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging
+n_dvn: 2  # BitGo DVN (required) + 1 of {LZ Labs, Polyhedra, Canary} — OFT selected Sep 2024; paused post-KelpDAO Apr 2026
