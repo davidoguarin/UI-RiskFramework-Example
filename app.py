@@ -613,6 +613,92 @@ def _show_strategy_results(
         if rows:
             st.dataframe(pd.DataFrame(rows).set_index("Protocol"), use_container_width=True)
 
+# ── Protocol AI agent ────────────────────────────────────────────────────────
+
+def show_protocol_agent_section() -> None:
+    st.markdown("---")
+    st.header("Add New Protocol via AI Agent")
+    st.markdown(
+        "Type a protocol name and the AI agent will search the web to gather all required data "
+        "and generate a YAML config ready for risk scoring."
+    )
+
+    # API key — from Streamlit secrets or manual input
+    api_key = None
+    try:
+        api_key = st.secrets["ANTHROPIC_API_KEY"]
+    except Exception:
+        pass
+    if not api_key:
+        api_key = st.text_input(
+            "Anthropic API key",
+            type="password",
+            help="Set ANTHROPIC_API_KEY in Streamlit secrets to avoid entering it manually.",
+        )
+
+    # Chat history
+    if "agent_messages" not in st.session_state:
+        st.session_state.agent_messages = []
+
+    for msg in st.session_state.agent_messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    if prompt := st.chat_input("Protocol name (e.g. 'Spark', 'Kamino', 'Sky')…"):
+        if not api_key:
+            st.warning("Enter your Anthropic API key above first.")
+            st.stop()
+
+        # Show user message
+        st.session_state.agent_messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            search_log = []
+
+            status_placeholder = st.empty()
+            yaml_placeholder   = st.empty()
+
+            def on_search(query: str) -> None:
+                search_log.append(query)
+                status_placeholder.markdown(
+                    "**Searching…**\n" + "\n".join(f"- `{q}`" for q in search_log)
+                )
+
+            try:
+                from agent_protocol import run_agent
+                yaml_text = run_agent(
+                    protocol_name=prompt,
+                    api_key=api_key,
+                    on_search=on_search,
+                )
+                status_placeholder.empty()
+                yaml_placeholder.code(yaml_text, language="yaml")
+
+                # Save button
+                stem = prompt.strip().lower().replace(" ", "_").replace("-", "_")
+                save_path = BASE / "configs" / "protocols" / f"{stem}.yaml"
+                col_save, col_info = st.columns([1, 4])
+                with col_save:
+                    if st.button("Save to protocols", key=f"save_{stem}"):
+                        save_path.write_text(yaml_text, encoding="utf-8")
+                        st.success(f"Saved as `configs/protocols/{stem}.yaml`. Reload the app to see it.")
+                with col_info:
+                    st.caption(
+                        f"Review all values before saving — especially ⚠ flagged fields. "
+                        f"Will be saved as `{stem}.yaml`."
+                    )
+
+                full_reply = f"Here is the generated YAML for **{prompt}**:\n\n```yaml\n{yaml_text}\n```"
+            except Exception as e:
+                status_placeholder.empty()
+                full_reply = f"Error running agent: {e}"
+                st.error(full_reply)
+
+            st.session_state.agent_messages.append({"role": "assistant", "content": full_reply})
+
+
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 LOGO_PATH = BASE / "assets" / "p2p_logo.png"
@@ -651,6 +737,7 @@ def main() -> None:
         show_protocol_grid(all_protocols)
 
     show_vault_strategy_section(all_protocols, params)
+    show_protocol_agent_section()
 
 
 if __name__ == "__main__":
