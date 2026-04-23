@@ -54,3 +54,4 @@ bad_debt_ratio: 0.0003     # Small undisclosed rsETH exposure from Kelp exploit 
 bad_debt_prevention:
   max_ltv: 0.94            # ~94% for correlated pairs per Gauntlet recommendations (source: Euler governance forum)
   has_safety_module: false # No safety module; per-vault isolation architecture
+  largest_borrower_ratio: 0.020     # Est. central; modular vault isolation; ~$1B+ ecosystem (Gauntlet dashboard, Apr 2026)

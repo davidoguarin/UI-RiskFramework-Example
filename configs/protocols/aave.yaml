@@ -35,3 +35,4 @@ bad_debt_ratio: 0.0065     # ~$91.8M / $14.24B borrows — Kelp rsETH exploit Ap
 bad_debt_prevention:
   max_ltv: 0.97            # Stablecoin e-mode ceiling (ETH-correlated = 0.93, standard = 0.75-0.80)
   has_safety_module: true  # Aave Umbrella (~$54M WETH staking backstop; stkAAVE 30% slashing)
+  largest_borrower_ratio: 0.019      # ~$270M whale / $14.24B borrows (Nov 2025 whale alert; Apr 2026 Kelp exploit anchor)

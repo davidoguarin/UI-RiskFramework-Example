@@ -35,3 +35,4 @@ bad_debt_ratio: 0.0        # Zero confirmed bad debt; froze rsETH markets hours 
 bad_debt_prevention:
   max_ltv: 0.85            # ~85% borrow collateral factor e.g. WBTC/USDC market (source: Compound docs)
   has_safety_module: false # Reserve fund only (protocol fee accumulator); no slashable safety module
+  largest_borrower_ratio: 0.030  # Est. central; smaller pool ~$300-500M active borrows, fewer borrowers (Chaos Labs, Apr 2026)

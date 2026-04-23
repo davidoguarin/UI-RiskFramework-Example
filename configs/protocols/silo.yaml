@@ -49,3 +49,4 @@ bad_debt_ratio: 0.0        # No documented bad debt; isolated per-silo architect
 bad_debt_prevention:
   max_ltv: 0.85            # ~85% example (wstETH/ETH silos); custom per deployer (source: Silo Finance)
   has_safety_module: false # No safety module; silo isolation is the primary risk control
+  largest_borrower_ratio: 0.100      # Small Ethereum borrow base ~$10M; any mid-size whale dominates (Nansen research, Jan 2026)

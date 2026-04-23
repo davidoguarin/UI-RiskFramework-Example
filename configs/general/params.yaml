@@ -61,6 +61,8 @@ parameters:
   mu_bd: 1.0
   # mu_bdp: weight of S_BDP term in PRS_i
   mu_bdp: 0.5
+  # kappa_conc: largest-borrower concentration sensitivity in S_BDP
+  kappa_conc: 10.0
   # phi_dvn (φ_dvn): DVN sensitivity: S_DVN = exp(-phi_dvn * max(0, n_dvn - 1))
   phi_dvn: 0.5
   # lambda_dvn (λ_dvn): weight of DVN term in CRS_i; 0 when n_dvn is null (not applicable)

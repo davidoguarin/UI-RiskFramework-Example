@@ -200,10 +200,17 @@ def s_bd(bad_debt_ratio: float, kappa_bd: float) -> float:
     return round(1.0 - math.exp(-kappa_bd * bad_debt_ratio), DECIMALS)
 
 
-def s_bdp(max_ltv: float, eta_ltv: float, has_safety_module: bool, iota_sf: float) -> float:
-    """Bad debt prevention: structural risk from aggressive LTV, discounted by safety module."""
+def s_bdp(max_ltv: float, eta_ltv: float, conc_ratio: float, kappa_conc: float,
+          has_safety_module: bool, iota_sf: float) -> float:
+    """
+    Bad debt prevention: LTV aggressiveness + largest-borrower concentration,
+    both discounted by the safety module.
+    S_BDP = [(1-exp(-eta_ltv*max_ltv)) + (1-exp(-kappa_conc*conc_ratio))] * delta_sf
+    """
     delta_sf = iota_sf if has_safety_module else 1.0
-    return round((1.0 - math.exp(-eta_ltv * max_ltv)) * delta_sf, DECIMALS)
+    ltv_term  = 1.0 - math.exp(-eta_ltv * max_ltv)
+    conc_term = 1.0 - math.exp(-kappa_conc * conc_ratio)
+    return round((ltv_term + conc_term) * delta_sf, DECIMALS)
 
 
 def compute_bad_debt_scores(protocol: dict, params: dict) -> Tuple[float, float, Dict]:
@@ -230,12 +237,16 @@ def compute_bad_debt_scores(protocol: dict, params: dict) -> Tuple[float, float,
         details["bd_ratio"] = float(bd_ratio)
 
     if bdp is not None and isinstance(bdp, dict):
-        max_ltv = float(bdp.get("max_ltv", 0.0))
-        has_sf  = bool(bdp.get("has_safety_module", False))
-        score   = s_bdp(max_ltv, eta_ltv, has_sf, iota_sf)
-        bdp_term = round(mu_bdp * score, DECIMALS)
+        max_ltv    = float(bdp.get("max_ltv", 0.0)) if bdp.get("max_ltv") is not None else 0.0
+        has_sf     = bool(bdp.get("has_safety_module", False))
+        conc_raw   = bdp.get("largest_borrower_ratio")
+        conc_ratio = float(conc_raw) if conc_raw is not None else 0.0
+        kappa_conc = required_param(params, "kappa_conc")
+        score      = s_bdp(max_ltv, eta_ltv, conc_ratio, kappa_conc, has_sf, iota_sf)
+        bdp_term   = round(mu_bdp * score, DECIMALS)
         details["S_BDP"] = score
         details["max_ltv"] = max_ltv
+        details["largest_borrower_ratio"] = conc_ratio
         details["has_safety_module"] = has_sf
 
     return bd_term, bdp_term, details
