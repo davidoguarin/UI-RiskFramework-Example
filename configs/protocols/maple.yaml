@@ -45,3 +45,6 @@ multisig_requirements:  # Emergency pause (multisig) + governance: https://maple
   minting: "unknown"
 
 n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging
+
+bad_debt_ratio: 0.01       # >99% repayment rate; ~1% lifetime loss across $12B+ cumulative loans (source: Maple Finance)
+bad_debt_prevention: null  # Uncollateralized institutional credit; LTV not applicable; pool cover first-loss exists but thin

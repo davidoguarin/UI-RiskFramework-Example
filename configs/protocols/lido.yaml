@@ -35,3 +35,6 @@ multisig_requirements:  # many committee Safes with different quorums — https:
   minting: "N/A"
 
 n_dvn: 2  # Polyhedra zkLightClient + Nethermind DVN (source: Lido governance forum, MIP for wstETH OFT)
+
+bad_debt_ratio: null       # bad_debt_usd / total_loans_usd; null = non-lending protocol
+bad_debt_prevention: null  # {max_ltv: <float>, has_safety_module: <bool>}; null = non-lending

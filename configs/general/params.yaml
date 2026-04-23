@@ -50,6 +50,17 @@ parameters:
   tau_v: 0.5
   # iota (ι): multiplier on (S_VDec + S_VOps) when validator_services.has_slashing_insurance is true; else 1.0
   iota: 0.8
+  # ── Bad debt scores (PRS) ──────────────────────────────────────────────────
+  # kappa_bd: S_BD sensitivity: S_BD = 1 - exp(-kappa_bd * bad_debt_ratio)
+  kappa_bd: 50.0
+  # eta_ltv: LTV sensitivity: base of S_BDP = 1 - exp(-eta_ltv * max_ltv)
+  eta_ltv: 2.0
+  # iota_sf: multiplier on S_BDP when protocol has a safety module (< 1 = discount)
+  iota_sf: 0.6
+  # mu_bd: weight of S_BD term in PRS_i
+  mu_bd: 1.0
+  # mu_bdp: weight of S_BDP term in PRS_i
+  mu_bdp: 0.5
   # phi_dvn (φ_dvn): DVN sensitivity: S_DVN = exp(-phi_dvn * max(0, n_dvn - 1))
   phi_dvn: 0.5
   # lambda_dvn (λ_dvn): weight of DVN term in CRS_i; 0 when n_dvn is null (not applicable)

@@ -7,3 +7,6 @@ validator_services: null  # cbBTC is an asset wrapper; no validator operations
 counterparty_protocols: null  # Asset; S_CDiv not applicable
 
 n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging
+
+bad_debt_ratio: null       # bad_debt_usd / total_loans_usd; null = non-lending protocol
+bad_debt_prevention: null  # {max_ltv: <float>, has_safety_module: <bool>}; null = non-lending

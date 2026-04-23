@@ -28,6 +28,7 @@ from calculate_CRS import (
     compute_s_dvn,
 )
 from calculate_PRS import (
+    compute_bad_debt_scores,
     compute_prs,
     compute_psr,
     is_asset,
@@ -67,13 +68,15 @@ DISPLAY_NAMES: dict[str, str] = {
 }
 
 PRS_META: dict[str, tuple[str, str]] = {
-    "S_Maturity":     ("Protocol Maturity",   "Age-based maturity risk — lower = more established"),
-    "S_sigmaTVL":     ("TVL Volatility",       "TVL instability risk"),
-    "S_NAudits":      ("Audit Coverage",       "Inverse of weighted audit count — lower = more audits"),
-    "S_TAudit":       ("Time Since Audit",     "Recency of last security audit"),
-    "S_CE":           ("Critical Exploits",    "Historical exploit severity"),
-    "S_MS":           ("Multisig Governance",  "Centralisation of privileged actions"),
-    "Delta_Critical": ("Recent Critical Event","Depeg / freeze / governance attack in last month"),
+    "S_Maturity":     ("Protocol Maturity",      "Age-based maturity risk — lower = more established"),
+    "S_sigmaTVL":     ("TVL Volatility",          "TVL instability risk"),
+    "S_NAudits":      ("Audit Coverage",          "Inverse of weighted audit count — lower = more audits"),
+    "S_TAudit":       ("Time Since Audit",        "Recency of last security audit"),
+    "S_CE":           ("Critical Exploits",       "Historical exploit severity"),
+    "S_MS":           ("Multisig Governance",     "Centralisation of privileged actions"),
+    "Delta_Critical": ("Recent Critical Event",   "Depeg / freeze / governance attack in last month"),
+    "S_BD":           ("Bad Debt Incidence",      "Current bad debt ratio — 0 for non-lending protocols"),
+    "S_BDP":          ("Bad Debt Prevention",     "Structural risk from LTV settings; discounted by safety module"),
 }
 
 CRS_META: dict[str, str] = {

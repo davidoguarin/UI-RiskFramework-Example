@@ -30,3 +30,8 @@ multisig_requirements:  # AAVE token page documents AFC = 3-of-4 multisig for bu
   minting: "unknown"
 
 n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging
+
+bad_debt_ratio: 0.0065     # ~$91.8M / $14.24B borrows — Kelp rsETH exploit Apr 2026 (source: Aave governance incident report)
+bad_debt_prevention:
+  max_ltv: 0.97            # Stablecoin e-mode ceiling (ETH-correlated = 0.93, standard = 0.75-0.80)
+  has_safety_module: true  # Aave Umbrella (~$54M WETH staking backstop; stkAAVE 30% slashing)

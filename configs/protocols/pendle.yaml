@@ -48,3 +48,6 @@ multisig_requirements:  # 2/4 Safe referenced e.g. https://forum.arbitrum.founda
   minting: "2/4"
 
 n_dvn: null  # Uses LayerZero OFT — DVN config not publicly documented; verify on-chain via getConfig()
+
+bad_debt_ratio: null       # bad_debt_usd / total_loans_usd; null = non-lending protocol
+bad_debt_prevention: null  # {max_ltv: <float>, has_safety_module: <bool>}; null = non-lending

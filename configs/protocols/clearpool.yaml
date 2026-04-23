@@ -39,3 +39,6 @@ multisig_requirements:  # Tokenomics (treasury/team multisig cold storage): http
   minting: "unknown"
 
 n_dvn: null  # Uses LayerZero OFT — DVN config not publicly documented; verify on-chain via getConfig()
+
+bad_debt_ratio: 0.0        # No defaults found 2024-2026; 5%-of-interest pool insurance reserve (source: Clearpool docs)
+bad_debt_prevention: null  # Uncollateralized institutional credit; LTV not applicable

@@ -30,3 +30,8 @@ multisig_requirements:  # Pause Guardian / Community Multi-Sig: https://compound
   minting: "unknown"
 
 n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging
+
+bad_debt_ratio: 0.0        # Zero confirmed bad debt; froze rsETH markets hours after Kelp exploit Apr 2026
+bad_debt_prevention:
+  max_ltv: 0.85            # ~85% borrow collateral factor e.g. WBTC/USDC market (source: Compound docs)
+  has_safety_module: false # Reserve fund only (protocol fee accumulator); no slashable safety module

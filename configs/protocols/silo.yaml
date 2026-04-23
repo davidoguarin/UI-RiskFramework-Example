@@ -44,3 +44,8 @@ multisig_requirements:  # Protocol overview / roles: https://devdocs.silo.financ
   minting: "unknown"
 
 n_dvn: null  # Number of required LayerZero DVNs; null = no cross-chain DVN messaging
+
+bad_debt_ratio: 0.0        # No documented bad debt; isolated per-silo architecture prevents contagion
+bad_debt_prevention:
+  max_ltv: 0.85            # ~85% example (wstETH/ETH silos); custom per deployer (source: Silo Finance)
+  has_safety_module: false # No safety module; silo isolation is the primary risk control

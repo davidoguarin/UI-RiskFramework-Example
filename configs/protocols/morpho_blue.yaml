@@ -37,3 +37,8 @@ multisig_requirements:  # Morpho org page (Apr 2026): https://docs.morpho.org/le
   minting: "N/A"
 
 n_dvn: 2  # LayerZero Labs DVN + Canary DVN (source: MIP-113 governance forum, Aug 2025)
+
+bad_debt_ratio: 0.001      # Isolated sdeUSD/USDC market: 3.6% in that vault; negligible protocol-wide (source: Coinfomania)
+bad_debt_prevention:
+  max_ltv: 0.98            # Governance-approved LLTV ceiling; curated vaults use 86-94.5% in practice (source: Morpho docs)
+  has_safety_module: false # No module; bad debt socialized per-market to lenders

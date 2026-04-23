@@ -65,3 +65,6 @@ multisig_requirements:
   minting: "7/10"
 
 n_dvn: 2  # LayerZero Labs DVN + Horizen DVN (source: Sandman Substack security analysis, Apr 2026)
+
+bad_debt_ratio: null       # bad_debt_usd / total_loans_usd; null = non-lending protocol
+bad_debt_prevention: null  # {max_ltv: <float>, has_safety_module: <bool>}; null = non-lending
